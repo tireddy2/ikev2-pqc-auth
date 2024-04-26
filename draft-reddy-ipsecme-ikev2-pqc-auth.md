@@ -1,6 +1,6 @@
 ---
-title: "Signature Authentication in the Internet Key Exchange Version 2 (IKEv2) using ML-DSA"
-abbrev: "Signature Authentication in IKEv2 using ML-DSA"
+title: "Signature Authentication in the Internet Key Exchange Version 2 (IKEv2) using PQC"
+abbrev: "Signature Authentication in IKEv2 using PQC"
 category: std
 
 docname: draft-reddy-ipsecme-ikev2-pqc-auth
@@ -41,6 +41,18 @@ informative:
      title: "FIPS 204 (Initial Public Draft): Module-Lattice-Based Digital Signature Standard"
      target: https://doi.org/10.6028/NIST.FIPS.204.ipd
      date: false
+  FIPS205:
+     title: "FIPS 205 (Initial Public Draft): Stateless Hash-Based Digital Signature Standard"
+     target: https://doi.org/10.6028/NIST.FIPS.205.ipd
+     date: false
+  FIPS180:
+     title: "NIST, Secure Hash Standard (SHS), FIPS PUB 180-4, August 2015"
+     target: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf 
+     date: false
+  FIPS202:
+     title: "NIST, SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions, FIPS PUB 202, August 2015."
+     target: https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.202.pdf 
+     date: false
   Lyu09:
       title: "V. Lyubashevsky, “Fiat-Shamir With Aborts: Applications to Lattice and Factoring-Based Signatures“, ASIACRYPT 2009"
       target: https://www.iacr.org/archive/asiacrypt2009/59120596/59120596.pdf
@@ -56,20 +68,17 @@ informative:
 
 Signature-based authentication methods are utilized in IKEv2 {{?RFC7296}}. The current version of the Internet Key Exchange Version 2 (IKEv2) protocol supports traditional digital signatures.
 
-This document outlines how post-quantum digital signatures, specifically Module-Lattice-Based Digital Signatures (ML-DSA), can be employed as an authentication method within the IKEv2 protocol. It introduces ML-DSA capability to IKEv2 without necessitating any alterations to existing IKE operations.
+This document outlines how post-quantum digital signatures, specifically Module-Lattice-Based Digital Signatures (ML-DSA) and Stateless Hash-Based Digital Signatures (SLH-DSA), can be employed as an authentication method within the IKEv2 protocol. It introduces ML-DSA and SLH-DSA capability to IKEv2 without necessitating any alterations to existing IKE operations.
 
 --- middle
 
 # Introduction
 
-The Internet Key Exchange, or IKEv2 {{?RFC7296}}, is a key agreement and security negotiation protocol; it is used for key establishment in IPsec.  In the initial set of exchanges, both parties must
-authenticate each other using a negotiated authentication method.  In IKEv2, it occurs in the exchange called IKE_AUTH.  One option for the authentication method is digital signatures using public key
-cryptography.  Currently, traditional digital signatures are defined for use within IKE_AUTH: RSA signatures, Digital Signature Algorithm (DSA) Digital Signature Standard (DSS) and ECDSA. 
+The Internet Key Exchange, or IKEv2 {{?RFC7296}}, is a key agreement and security negotiation protocol; it is used for key establishment in IPsec.  In the initial set of exchanges, both parties must authenticate each other using a negotiated authentication method.  In IKEv2, it occurs in the exchange called IKE_AUTH.  One option for the authentication method is digital signatures using public key cryptography.  Currently, traditional digital signatures are defined for use within IKE_AUTH: RSA signatures, Digital Signature Algorithm (DSA) Digital Signature Standard (DSS) and ECDSA. 
 
 The presence of a Cryptographically Relevant Quantum Computer (CRQC) would render state-of-the-art, traditional public-key algorithms deployed today obsolete and insecure, since the assumptions about the intractability of the mathematical problems for these algorithms that offer confident levels of security today no longer apply in the presence of a CRQC. This means there is a requirement to update protocols and infrastructure to use post-quantum algorithms, which are public-key algorithms designed to be secure against CRQCs as well as classical computers. The traditional cryptographic primitives that need to be replaced by PQC are discussed in {{?I-D.ietf-pquip-pqc-engineers}}.
 
-Module-Lattice-Based Digital Signatures (ML-DSA) is a quantum-resistant digital signature scheme standardized by the US National Institute of Standards and Technology (NIST) PQC project [NIST-PQC].
-This document specifies the use of the ML-DSA algorithm in IKEv2. 
+Module-Lattice-Based Digital Signatures (ML-DSA) [FIPS204] and Stateless Hash-Based Digital Signatures (SLH-DSA) [FIPS205] are quantum-resistant digital signature schemes standardized by the US National Institute of Standards and Technology (NIST) PQC project. This document specifies the use of the ML-DSA and SLH-DSA algorithms in IKEv2. 
 
 # Conventions and Definitions
 
@@ -88,32 +97,48 @@ as Elliptic Curve Diffie-Hellman Ephemeral (ECDHE).
 "Post-Quantum Algorithm": An asymmetric cryptographic algorithm that is believed to be secure against attacks using quantum computers as well as classical computers. Examples of quantum-resistant digital signature schemes include ML-DSA, Falcon and SLH-DSA.
 
 
-# ML-DSA Signatures in IKEv2 {#ml-dsa}
+# Specifying ML-DSA within IKEv2 {#ml-dsa}
 
-ML-DSA [FIPS204] is a digital signature algorithm (part of the CRYSTALS suite) based on the hardness lattice problems over module lattices (i.e., the Module Learning with Errors problem (MLWE)). The design of the algorithm is based on the "Fiat-Shamir with Aborts" {{Lyu09}} framework introduced by Lyubashevsky, that leverages rejection sampling to render lattice based FS schemes compact and secure. Dilithium uses uniform distribution over small integers for computing coefficients in error vectors, which makes the scheme easier to implement.
+ML-DSA [FIPS204] is a digital signature algorithm (part of the CRYSTALS suite) based on the hardness lattice problems over module lattices (i.e., the Module Learning with Errors problem (MLWE)). The design of the algorithm is based on the "Fiat-Shamir with Aborts" {{Lyu09}} framework introduced by Lyubashevsky, that leverages rejection sampling to render lattice based FS schemes compact and secure. ML-DSA uses uniform distribution over small integers for computing coefficients in error vectors, which makes the scheme easier to implement.
 
-Dilithium offers both deterministic and randomized signing and is instantiated with 3 parameter sets for the security categories 2, 3 and 5. Security properties of Dilithium are discussed in Section 9 of {{?I-D.ietf-lamps-dilithium-certificates}}. This document specifies the use of the ML-DSA algorithm in IKEv2 at three security levels: ML-DSA-44, ML-DSA-65, and ML-DSA-87. 
+ML-DSA offers both deterministic and randomized signing and is instantiated with 3 parameter sets for the security categories 2, 3 and 5. Security properties of ML-DSA are discussed in Section 9 of {{?I-D.ietf-lamps-dilithium-certificates}}. This document specifies the use of the ML-DSA algorithm in IKEv2 at three security levels: ML-DSA-44, ML-DSA-65, and ML-DSA-87. 
 
-In the case of Dilithium, it internally incorporates the necessary hash operations as part of its signing algorithm. Dilithium directly takes the original message, applies a hash function internally, and then uses the resulting hash value for the signature generation process. However, ML-DSA signatures may require the signing procedure to be repeated several times for a signature to be produced. To optimize performance and prevent rehashing with each attempt, ML-DSA implementations can make use of pre-hashing the message. Pre-hashing, however, assigns an additional computational requirement to the verifier, as they must also hash the message before signature verification. Additionally, pre-hashing reintroduces the weakness that hash collisions directly yield signature forgeries. As a result, while pre-hashing can enhance the predictability of performance, it may not always lead to improved efficiency in ML-DSA usage.
+In the case of ML-DSA, it internally incorporates the necessary hash operations as part of its signing algorithm. ML-DSA directly takes the original message, applies a hash function internally, and then uses the resulting hash value for the signature generation process. However, ML-DSA signatures may require the signing procedure to be repeated several times for a signature to be produced. To optimize performance and prevent rehashing with each attempt, ML-DSA implementations can make use of pre-hashing the message. Pre-hashing, however, assigns an additional computational requirement to the verifier, as they must also hash the message before signature verification. Additionally, pre-hashing reintroduces the weakness that hash collisions directly yield signature forgeries. As a result, while pre-hashing can enhance the predictability of performance, it may not always lead to improved efficiency in ML-DSA usage.
 
 TBD: I haven't come across any discussions in other specifications regarding the use of pre-hashing with ML-DSA. Is there a specific need for pre-hashing with ML-DSA in the context of IKEv2?
 
-ML-DSA offers both deterministic and randomized signing. By default ML-DSA signatures are non-deterministic, the private random seed rho' is pseudorandomly derived from the signer’s private key, the message, and a 256-bit string, rnd - where rnd should be generated by an approved Random Bit Generator (RBG). In the deterministic version, rng is instead a 256-bit constant string. In the context of signature-based authentication in IKEv2, the composition of the data used for generating a digital signature is unique for each IKEv2 session. This uniqueness arises because the data includes session-specific information such as nonces, cryptographic parameters, and identifiers. If ML-DSA is used as an authentication method within the IKEv2 protocol, the deterministic version of ML-DSA MUST be used.
+ML-DSA offers both deterministic and randomized signing. By default ML-DSA signatures are non-deterministic, the private random seed rho' is pseudorandomly derived from the signer’s private key, the message, and a 256-bit string, rnd - where rnd should be generated by an approved Random Bit Generator (RBG). In the deterministic version, rnd is instead a 256-bit constant string. In the context of signature-based authentication in IKEv2, the composition of the data used for generating a digital signature is unique for each IKEv2 session. This uniqueness arises because the data used for signature creation includes session-specific information such as nonces, cryptographic parameters, and identifiers. If ML-DSA is used as an authentication method within the IKEv2 protocol, the deterministic version of ML-DSA MUST be used.
 
-The performance characteristics of Dilithium and Falcon may differ based on the specific implementation and hardware platform. Generally, Dilithium is known for its relatively fast signature generation, while Falcon can provide more efficient signature verification. The main potential downsides of Falcon refer to the non-triviality of its algorithms and the need for floating point arithmetic support in order to support Gaussian-distributed random number sampling where the other lattice schemes use the less efficient but easier to support uniformly-distributed random number sampling. Implementers of Falcon need to be aware that Falcon signing is highly susceptible to side-channel attacks, unless constant-time 64-bit floating-point operations are used. This requirement is extremely platform-dependent, as noted in NIST's report. SLH-DSA offers smaller key sizes, larger signature sizes, slower signature generation, and slower verification when compared to Dilithium and Falcon.
+The performance characteristics of ML-DSA and Falcon may differ based on the specific implementation and hardware platform. Generally, ML-DSA is known for its relatively fast signature generation, while Falcon can provide more efficient signature verification. The main potential downsides of Falcon refer to the non-triviality of its algorithms and the need for floating point arithmetic support in order to support Gaussian-distributed random number sampling where the other lattice schemes use the less efficient but easier to support uniformly-distributed random number sampling. Implementers of Falcon need to be aware that Falcon signing is highly susceptible to side-channel attacks, unless constant-time 64-bit floating-point operations are used. This requirement is extremely platform-dependent, as noted in NIST's report. 
 
-# Specifying ML-DSA within IKEv2
+# Specifying SLH-DSA within IKEv2 {#slh-dsa}
+
+SLH-DSA [FIPS205] utilizes the concept of stateless hash-based signatures, where each signature is unique and unrelated to any previous signature. This property eliminates the need for maintaining state information during the signing process. SLH-DSA is designed to sign up to 2^64 messages and it offers three security levels. The parameters for each of the security levels were chosen to provide 128 bits of security, 192 bits of security, and 256 bits of security. This document specifies the use of the SLH-DSA algorithm in IKEv2 at three security levels, which are used to generate the SLH-DSA hypertree. It includes the small (S) or fast (F) versions of the algorithm and allows for the use of either SHA-256 [FIPS180] or SHAKE256 [FIPS202] as the hash function. The following combinations are defined:
+
+* SLH-DSA-128S-SHAKE
+* SLH-DSA-128F-SHAKE
+* SLH-DSA-128S-SHA2
+* SLH-DSA-128F-SHA2
+* SLH-DSA-192S-SHAKE
+* SLH-DSA-192F-SHAKE
+* SLH-DSA-256S-SHAKE
+* SLH-DSA-256F-SHAKE
+
+SLH-DSA offers smaller key sizes, larger signature sizes, slower signature generation, and slower verification when compared to ML-DSA and Falcon. SLH-DSA does not introduce a new hardness assumption beyond those inherent to the underlying hash functions. It builds upon established foundations in cryptography, making it a reliable and robust digital signature scheme for a post-quantum world. The advantages and disadvantages of SLH-DSA over other signature algorithms is discussed in Section 3.1 of {{?I-D.draft-ietf-cose-sphincs-plus}}. While attacks on lattice-based schemes like ML-DSA can compromise their security, SLH-DSA will remain unaffected by these attacks due to its distinct mathematical foundations. This ensures the continued security of systems and protocols that utilize SLH-DSA for digital signatures.
 
 # Security Considerations
 
-ML-DSA is modeled under existentially unforgeable digital signatures with respect to an adaptive chosen message attack (EUF-CMA). ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security
-comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively.
+ML-DSA and SLH-DSA are modeled under existentially unforgeable digital signatures with respect to an adaptive chosen message attack (EUF-CMA). 
 
-The Security Considerations section of {{?I-D.ietf-lamps-dilithium-certificates}} applies to this specification as well.
+ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively. Simiarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-SHAKE, and SLH-DSA-128{S,F}-SHAKE are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively.
+
+The Security Considerations section of {{?I-D.ietf-lamps-dilithium-certificates}} and {{?I-D.ietf-lamps-cms-sphincs-plus}} applies to this specification as well.
 
 # IANA Considerations
 
 IANA is requested to update the registry of IKEv2 authentication methods in [IANA-IKEv2] to include the following ML-DSA variants: ML-DSA-44, ML-DSA-65, and ML-DSA-87.
+
+IANA is also requested to update the registry of IKEv2 authentication methods in [IANA-IKEv2] to include the following SLH-DSA variants: SLH-DSA-128S-SHAKE, SLH-DSA-128F-SHAKE, SLH-DSA-128S-SHA2, SLH-DSA-128F-SHA2, SLH-DSA-192S-SHAKE, SLH-DSA-192F-SHAKE, SLH-DSA-256S-SHAKE, and SLH-DSA-256F-SHAKE.
 
 # Acknowledgements
 {:numbered="false"}
