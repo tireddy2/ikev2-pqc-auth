@@ -128,6 +128,27 @@ The following combinations are defined:
 
 SLH-DSA offers smaller key sizes, larger signature sizes, slower signature generation, and slower verification when compared to ML-DSA and Falcon. SLH-DSA does not introduce a new hardness assumption beyond those inherent to the underlying hash functions. It builds upon established foundations in cryptography, making it a reliable and robust digital signature scheme for a post-quantum world. The advantages and disadvantages of SLH-DSA over other signature algorithms is discussed in Section 3.1 of {{?I-D.draft-ietf-cose-sphincs-plus}}. While attacks on lattice-based schemes like ML-DSA can compromise their security, SLH-DSA will remain unaffected by these attacks due to its distinct mathematical foundations. This ensures the continued security of systems and protocols that utilize SLH-DSA for digital signatures.
 
+
+# Mechanisms for Signaling Supported Key Pair Types
+
+The following mechanisms can be used by peers to signal the types of public/private key pairs they possess:
+
+*  One method to ascertain that the key the initiator wants the responder
+   to use is through a Certificate Request payload sent by the
+   initiator.  For example, the initiator could indicate in the
+   Certificate Request payload that it trusts a certificate authority
+   certificate signed by an ML-DSA or SLH-DSA key. This indication implies 
+   that the initiator can process ML-DSA or SLH-DSA signatures, which means 
+   that the responder can use ML-DSA or SLH-DSA keys when authenticating.
+*  Another method is to leverage {{?I-D.draft-ipsecme-ikev2-auth-announce}} that
+   allows peers to announce their supported authentication methods. It improves
+   interoperability when IKEv2 partners are configured with multiple
+   credentials of different type to authenticate each other. The responder includes 
+   a SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT response message 
+   containing the PQC digital signature scheme(s) it supports. The initiator includes 
+   the SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT request message, with 
+   the PQC digital signature scheme(s) supported by it, ordered by their preference.  
+
 # Security Considerations
 
 ML-DSA and SLH-DSA are modeled under existentially unforgeable digital signatures with respect to an adaptive chosen message attack (EUF-CMA). 
