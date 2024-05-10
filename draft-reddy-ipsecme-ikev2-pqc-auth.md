@@ -61,6 +61,10 @@ informative:
       title: "IKEv2 Parameters"
       target: http://www.iana.org/assignments/ikev2-parameters
       date: false
+  FN-DSA:
+     title: "Fast Fourier lattice-based compact signatures over NTRU"
+     target: https://falcon-sign.info/
+     date: false
 
 ---
 
@@ -68,7 +72,7 @@ informative:
 
 Signature-based authentication methods are utilized in IKEv2 {{?RFC7296}}. The current version of the Internet Key Exchange Version 2 (IKEv2) protocol supports traditional digital signatures.
 
-This document outlines how post-quantum digital signatures, specifically Module-Lattice-Based Digital Signatures (ML-DSA) and Stateless Hash-Based Digital Signatures (SLH-DSA), can be employed as an authentication method within the IKEv2 protocol. It introduces ML-DSA and SLH-DSA capability to IKEv2 without necessitating any alterations to existing IKE operations.
+This document outlines how post-quantum digital signatures, specifically Module-Lattice-Based Digital Signatures (ML-DSA) and Stateless Hash-Based Digital Signatures (SLH-DSA), can be employed as authentication methods within the IKEv2 protocol. It introduces ML-DSA and SLH-DSA capability to IKEv2 without necessitating any alterations to existing IKE operations.
 
 --- middle
 
@@ -76,7 +80,7 @@ This document outlines how post-quantum digital signatures, specifically Module-
 
 The Internet Key Exchange, or IKEv2 {{?RFC7296}}, is a key agreement and security negotiation protocol; it is used for key establishment in IPsec.  In the initial set of exchanges, both parties must authenticate each other using a negotiated authentication method.  In IKEv2, it occurs in the exchange called IKE_AUTH.  One option for the authentication method is digital signatures using public key cryptography.  Currently, traditional digital signatures are defined for use within IKE_AUTH: RSA signatures, Digital Signature Algorithm (DSA) Digital Signature Standard (DSS) and ECDSA. 
 
-The presence of a Cryptographically Relevant Quantum Computer (CRQC) would render state-of-the-art, traditional public-key algorithms deployed today obsolete and insecure, since the assumptions about the intractability of the mathematical problems for these algorithms that offer confident levels of security today no longer apply in the presence of a CRQC. This means there is a requirement to update protocols and infrastructure to use post-quantum algorithms, which are public-key algorithms designed to be secure against CRQCs as well as classical computers. The traditional cryptographic primitives that need to be replaced by PQC are discussed in {{?I-D.ietf-pquip-pqc-engineers}}.
+The presence of a Cryptographically Relevant Quantum Computer (CRQC) would render state-of-the-art traditional public-key algorithms obsolete and insecure. This is because the assumptions about the intractability of the mathematical problems these algorithms rely on, which offer confident levels of security today, no longer apply in the presence of a CRQC. Consequently, there is a requirement to update protocols and infrastructure to use post-quantum algorithms. Post-quantum algorithms are public-key algorithms designed to be secure against CRQCs as well as classical computers. The traditional cryptographic primitives that need to be replaced by PQC algorithms are discussed in {{?I-D.ietf-pquip-pqc-engineers}}.
 
 Module-Lattice-Based Digital Signatures (ML-DSA) [FIPS204] and Stateless Hash-Based Digital Signatures (SLH-DSA) [FIPS205] are quantum-resistant digital signature schemes standardized by the US National Institute of Standards and Technology (NIST) PQC project. This document specifies the use of the ML-DSA and SLH-DSA algorithms in IKEv2. 
 
@@ -87,14 +91,9 @@ Module-Lattice-Based Digital Signatures (ML-DSA) [FIPS204] and Stateless Hash-Ba
 This document uses terms defined in {{?I-D.ietf-pquip-pqt-hybrid-terminology}}. For the purposes of this document, it is helpful to be able to divide cryptographic algorithms
 into two classes:
 
-"Traditional Algorithm": An asymmetric cryptographic algorithm based
-on integer factorisation, finite field discrete logarithms or elliptic
-curve discrete logarithms. In the context of TLS, examples of
-traditional key exchange algorithms include Elliptic Curve
-Diffie-Hellman (ECDH); which is almost always used in the ephemeral mode referred to
-as Elliptic Curve Diffie-Hellman Ephemeral (ECDHE).
+"Asymmetric Traditional Cryptographic Algorithm": An asymmetric cryptographic algorithm based on integer factorisation, finite field discrete logarithms or elliptic curve discrete logarithms, elliptic curve discrete logarithms, or related mathematical problems. 
 
-"Post-Quantum Algorithm": An asymmetric cryptographic algorithm that is believed to be secure against attacks using quantum computers as well as classical computers. Examples of quantum-resistant digital signature schemes include ML-DSA, Falcon and SLH-DSA.
+"Post-Quantum Algorithm": An asymmetric cryptographic algorithm that is believed to be secure against attacks using quantum computers as well as classical computers. Post-quantum algorithms can also be called quantum-resistant or quantum-safe algorithms. Examples of quantum-resistant digital signature schemes include ML-DSA, FN-DSA and SLH-DSA.
 
 
 # Specifying ML-DSA within IKEv2 {#ml-dsa}
@@ -109,7 +108,7 @@ TBD: I haven't come across any discussions in other specifications regarding the
 
 ML-DSA offers both deterministic and randomized signing. By default ML-DSA signatures are non-deterministic, the private random seed rho' is pseudorandomly derived from the signer’s private key, the message, and a 256-bit string, rnd - where rnd should be generated by an approved Random Bit Generator (RBG). In the deterministic version, rnd is instead a 256-bit constant string. In the context of signature-based authentication in IKEv2, the composition of the data used for generating a digital signature is unique for each IKEv2 session. This uniqueness arises because the data used for signature creation includes session-specific information such as nonces, cryptographic parameters, and identifiers. If ML-DSA is used as an authentication method within the IKEv2 protocol, the deterministic version of ML-DSA MUST be used.
 
-The performance characteristics of ML-DSA and Falcon may differ based on the specific implementation and hardware platform. Generally, ML-DSA is known for its relatively fast signature generation, while Falcon can provide more efficient signature verification. The main potential downsides of Falcon refer to the non-triviality of its algorithms and the need for floating point arithmetic support in order to support Gaussian-distributed random number sampling where the other lattice schemes use the less efficient but easier to support uniformly-distributed random number sampling. Implementers of Falcon need to be aware that Falcon signing is highly susceptible to side-channel attacks, unless constant-time 64-bit floating-point operations are used. This requirement is extremely platform-dependent, as noted in NIST's report. 
+The performance characteristics of ML-DSA and FN-DSA [FN-DSA] may differ based on the specific implementation and hardware platform. Generally, ML-DSA is known for its relatively fast signature generation, while FN-DSA can provide more efficient signature verification. The main potential downsides of FN-DSA refer to the non-triviality of its algorithms and the need for floating point arithmetic support in order to support Gaussian-distributed random number sampling where the other lattice schemes use the less efficient but easier to support uniformly-distributed random number sampling. Implementers of FN-DSA need to be aware that FN-DSA signing is highly susceptible to side-channel attacks, unless constant-time 64-bit floating-point operations are used. This requirement is extremely platform-dependent, as noted in NIST's report. 
 
 # Specifying SLH-DSA within IKEv2 {#slh-dsa}
 
@@ -126,14 +125,14 @@ The following combinations are defined:
 * SLH-DSA-256S-SHAKE
 * SLH-DSA-256F-SHAKE
 
-SLH-DSA offers smaller key sizes, larger signature sizes, slower signature generation, and slower verification when compared to ML-DSA and Falcon. SLH-DSA does not introduce a new hardness assumption beyond those inherent to the underlying hash functions. It builds upon established foundations in cryptography, making it a reliable and robust digital signature scheme for a post-quantum world. The advantages and disadvantages of SLH-DSA over other signature algorithms is discussed in Section 3.1 of {{?I-D.draft-ietf-cose-sphincs-plus}}. While attacks on lattice-based schemes like ML-DSA can compromise their security, SLH-DSA will remain unaffected by these attacks due to its distinct mathematical foundations. This ensures the continued security of systems and protocols that utilize SLH-DSA for digital signatures.
+SLH-DSA offers smaller key sizes, larger signature sizes, slower signature generation, and slower verification when compared to ML-DSA and FN-DSA. SLH-DSA does not introduce a new hardness assumption beyond those inherent to the underlying hash functions. It builds upon established foundations in cryptography, making it a reliable and robust digital signature scheme for a post-quantum world. The advantages and disadvantages of SLH-DSA over other signature algorithms is discussed in Section 3.1 of {{?I-D.draft-ietf-cose-sphincs-plus}}. While attacks on lattice-based schemes like ML-DSA can compromise their security, SLH-DSA will remain unaffected by these attacks due to its distinct mathematical foundations. This ensures the continued security of systems and protocols that utilize SLH-DSA for digital signatures.
 
 
 # Mechanisms for Signaling Supported Key Pair Types
 
 The following mechanisms can be used by peers to signal the types of public/private key pairs they possess:
 
-*  One method to ascertain that the key the initiator wants the responder
+*  One method to ascertain that the key pair type the initiator wants the responder
    to use is through a Certificate Request payload sent by the
    initiator.  For example, the initiator could indicate in the
    Certificate Request payload that it trusts a certificate authority
@@ -147,7 +146,7 @@ The following mechanisms can be used by peers to signal the types of public/priv
    a SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT response message 
    containing the PQC digital signature scheme(s) it supports. The initiator includes 
    the SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT request message, with 
-   the PQC digital signature scheme(s) supported by it, ordered by their preference.  
+   the PQC digital signature scheme(s) supported by it, ordered by its preference.  
 
 # Security Considerations
 
