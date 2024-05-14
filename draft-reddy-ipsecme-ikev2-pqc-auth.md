@@ -145,7 +145,7 @@ The following mechanisms can be used by peers to signal the types of public/priv
 
 ML-DSA and SLH-DSA are modeled under existentially unforgeable digital signatures with respect to an adaptive chosen message attack (EUF-CMA). 
 
-ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively. Similarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-SHAKE, and SLH-DSA-256{S,F}-SHAKE are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively.
+ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively. Similarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-SHAKE, and SLH-DSA-256{S,F}-SHAKE are designed to offer security comparable with the AES-128, AES-192, and AES-256 respectively.
 
 The Security Considerations section of {{?I-D.ietf-lamps-dilithium-certificates}} and {{?I-D.ietf-lamps-cms-sphincs-plus}} applies to this specification as well.
 
