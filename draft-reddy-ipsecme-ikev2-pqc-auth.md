@@ -74,7 +74,9 @@ This document outlines how post-quantum digital signatures, specifically Module-
 
 # Introduction
 
-The Internet Key Exchange, or IKEv2 {{?RFC7296}}, is a key agreement and security negotiation protocol; it is used for key establishment in IPsec.  In the initial set of exchanges, both parties must authenticate each other using a negotiated authentication method.  In IKEv2, it occurs in the exchange called IKE_AUTH.  One option for the authentication method is digital signatures using public key cryptography.  Currently, traditional digital signatures are defined for use within IKE_AUTH: RSA signatures, Digital Signature Algorithm (DSA) Digital Signature Standard (DSS) and ECDSA. 
+The Internet Key Exchange, or IKEv2 {{?RFC7296}}, is a key agreement and security negotiation protocol; it is used for key establishment in IPsec.  In the initial set of exchanges, both parties independently select and use their preferred authentication method, which may even differ between the initiator and the responder. In IKEv2, it occurs in the exchange called IKE_AUTH.  One option for the authentication method is digital signatures using public key cryptography.  Currently, traditional digital signatures are defined for use within IKE_AUTH: RSA signatures, Digital Signature Algorithm (DSA) Digital Signature Standard (DSS) and ECDSA. 
+
+The Internet Key Exchange, or IKEv2 (RFC7296), is a key agreement and security negotiation protocol used for key establishment in IPsec. In the initial set of exchanges, both parties independently select and use their preferred authentication method, which may even differ between the initiator and the responder.
 
 The presence of a Cryptographically Relevant Quantum Computer (CRQC) would render state-of-the-art traditional public-key algorithms obsolete and insecure. This is because the assumptions about the intractability of the mathematical problems these algorithms rely on, which offer confident levels of security today, no longer apply in the presence of a CRQC. Consequently, there is a requirement to update protocols and infrastructure to use post-quantum algorithms. Post-quantum algorithms are public-key algorithms designed to be secure against CRQCs as well as classical computers. The traditional cryptographic primitives that need to be replaced by PQC algorithms are discussed in {{?I-D.ietf-pquip-pqc-engineers}}.
 
@@ -137,14 +139,15 @@ The following mechanisms can be used by peers to signal the types of public/priv
    credentials of different type to authenticate each other. The responder includes 
    a SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT response message 
    containing the PQC digital signature scheme(s) it supports. The initiator includes 
-   the SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT request message, with 
-   the PQC digital signature scheme(s) supported by it, ordered by its preference.  
+   the SUPPORTED_AUTH_METHODS notification in either the IKE_AUTH request message or 
+   in the IKE_INTERMEDIATE request. This notification lists the PQC digital signature 
+   scheme(s) supported by the initiator, ordered by preference.
 
 # Security Considerations
 
 ML-DSA and SLH-DSA are modeled under existentially unforgeable digital signatures with respect to an adaptive chosen message attack (EUF-CMA). 
 
-ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively. Simiarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-SHAKE, and SLH-DSA-128{S,F}-SHAKE are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively.
+ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively. Similarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-SHAKE, and SLH-DSA-256{S,F}-SHAKE are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively.
 
 The Security Considerations section of {{?I-D.ietf-lamps-dilithium-certificates}} and {{?I-D.ietf-lamps-cms-sphincs-plus}} applies to this specification as well.
 
