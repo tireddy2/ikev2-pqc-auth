@@ -109,7 +109,15 @@ The IKEv2 can use arbitrary signature algorithms as described in {{!RFC7427}}. T
 
 # Specifying SLH-DSA within IKEv2 {#slh-dsa}
 
-SLH-DSA [FIPS205] utilizes the concept of stateless hash-based signatures, where each signature is unique and unrelated to any previous signature. This property eliminates the need for maintaining state information during the signing process. SLH-DSA is designed to sign up to 2^64 messages and it offers three security levels. The parameters for each of the security levels were chosen to provide 128 bits of security, 192 bits of security, and 256 bits of security. This document specifies the use of the SLH-DSA algorithm in IKEv2 at three security levels, which are used to generate the SLH-DSA hypertree. It includes the small (S) or fast (F) versions of the algorithm and allows for the use of either SHA-256 [FIPS180] or SHAKE256 [FIPS202] as the hash function. The small version prioritizes reduced memory usage and smaller signature sizes, making them suitable for resource-constrained environments IoT devices. Conversely, the fast version prioritizes speed over signature size, minimizing the time required to generate and verify signatures.
+SLH-DSA [FIPS205] utilizes the concept of stateless hash-based signatures.
+In contrast to stateful signature algorithms, SLH-DSA eliminates the need for maintaining state information during the signing process.
+SLH-DSA is designed to sign up to 2^64 messages and it offers three security levels.
+The parameters for each of the security levels were chosen to provide 128 bits of security, 192 bits of security, and 256 bits of security.
+This document specifies the use of the SLH-DSA algorithm in IKEv2 at three security levels.
+It includes the small (S) or fast (F) versions of the algorithm and allows for the use of either SHA-256 [FIPS180] or SHAKE256 [FIPS202] as the hash function.
+The small version prioritizes smaller signature sizes, making them suitable for resource-constrained environments IoT devices.
+Conversely, the fast version prioritizes speed over signature size, minimizing the time required to generate and verify signatures.
+On the other hand, ML-DSA is far better at both signature generation time and signature size.
 
 The following combinations are defined:
 
