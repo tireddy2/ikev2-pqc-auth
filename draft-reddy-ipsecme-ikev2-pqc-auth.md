@@ -69,6 +69,7 @@ informative:
       title: "V. Lyubashevsky, “Fiat-Shamir With Aborts: Applications to Lattice and Factoring-Based Signatures“, ASIACRYPT 2009"
       target: https://www.iacr.org/archive/asiacrypt2009/59120596/59120596.pdf
       date: false
+  RFC8420:
 
 ---
 
@@ -130,6 +131,53 @@ The following combinations are defined in SLH-DSA {{FIPS205}}:
 SLH-DSA does not introduce a new hardness assumption beyond those inherent to the underlying hash functions. It builds upon established foundations in cryptography, making it a reliable and robust digital signature scheme for a post-quantum world. While attacks on lattice-based schemes like ML-DSA can compromise their security, SLH-DSA will remain unaffected by these attacks due to its distinct mathematical foundations. This ensures the continued security of systems and protocols that utilize SLH-DSA for digital signatures.
 
 # Signature Algorithm Use and Hashing in IKEv2 with ML-DSA and SLH-DSA
+
+For integrating ML-DSA and SLH-DSA into IKEv2, we take the approach used in [RFC8420]
+
+The implementation MUST send a SIGNATURE_HASH_ALGORITHMS notify with an Identity" (5) hash function.
+ML-DSA and SLH-DSA are only defined with the "Identity" hash and MUST NOT be sent to a receiver that has not indicated support for the "Identity" hash.
+
+When generating a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be signed (along with the fixed context string "IKEv2 Auth" (`49 4b 45 76 32 20 41 55 54 48`).
+The resulting signature is placed into the The resulting signature is the Signature Value.
+
+When verifying a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be verified (along with the fixed context string "IKEv2 Auth".
+
+## Discuession of ML-DSA and SLH-DSA and Prehashing
+
+The signature architecture within IKE was designed around RSA (and later extended to ECDSA).
+In this architecture, the actual message (the SignedOctets) are first hashed (using a hash that the verifier has indicated support for), and then passed for the remaining part of the signature generation processing.
+That is, it is designed for signature algorithms that first apply one of a number of hash functions to the message and then perform processing on that hash.
+Neither ML-DSA nor SLH-DSA fits cleanly into this architecture.
+
+We see three ways to address this mismatch.
+
+The first is to note that both ML-DSA and SLH-DSA have prehashed parameter sets; that is, ones designed to sign a message that has been hashed by an external source.
+At first place, this would appear to be an ideal solution, however it turns out that there are a number of practical issues.
+The first is that the prehashed version of ML-DSA and SLH-DSA would appear to be rarely used, and so it is not unlikely that support for it within crypto libraries may be lacking.
+The second is that the public keys for the prehashed versions use different OIDs; this means that the certificates for IKEv2 would necessarily be different than certificates for other protocols (and some CAs might not support issuing certificates for prehashed ML-DSA or prehashed SLH-DSA, again because of the lack of use).
+The third is that some users have expressed a desire not to use the prehashed parameter sets.
+
+The second is to note that, while IKEv2 normally acts this way, it doesn't always.
+EdDSA has a similar constraint on not working cleanly with the standard 'hash and then sign' paradigm, and so the existing [RFC8420] provides an alternative method, which ML-DSA would cleanly fit into.
+We could certainly adopt this same strategy; our concern would be that it might be more difficult for IKEv2 implementors which do not already have support for EdDSA.
+
+The third way is what we can refer to as 'fake prehashing'; IKEv2 would generate the hash as current, but instead of running ML-DSA or SLH-DSA in prehash mode, we have itsign it in pure mode as if it was the message.
+This is a violation of the spirit, if not the letter of FIPS 204, 205
+However, it is secure (assuming the hash function is strong), and fits in cleanly with both the existing IKEv2 architecture, and what crypto libraries provide.
+On the other hand, for SLH-DSA, this means that we're now dependent on collision resistance (while the rest of the SLH-DSA architecture was carefully designed not to be).
+
+## Context String
+
+An additional feature that ML-DSA, SLH-DSA provide it allows the signer and the verifier to provide a 'context string'.
+The signature would verify only if the context strings that are provided by both the signer and the verifier match.
+The reason behind this is to ensure that if a public key is used for multiple purposes, a signature for one purpose cannot be used by an adversary in another.
+In our case, if the same certificate where used to sign both IKEv2 and TLS exchanges, an adversary could not possibly take the signature from an TLS exchange and try to use it within an IKEv2 exchange.
+
+This really is not a necessary security safe guard; the messages that are actually signed in both cases are distinct enough that an adversary could not actually take advantage of this, even without the protection.
+
+However, given that ML-DSA and SLH-DSA do provide such a service, and it appears that crypto libraries do support a nonempty context, we cannot see a reason not to use it.
+
+# Use of ML-DSA and SLH-DSA
 
 Both ML-DSA and SLH-DSA offer deterministic and randomized signing options. By default, ML-DSA uses a non-deterministic approach, where the private random seed rho' is derived pseudorandomly from the signer’s private key, the message, and a 256-bit string, rnd, generated by an approved Random Bit Generator (RBG). In the deterministic version, rnd is instead a constant 256-bit string. Similarly, SLH-DSA can be deterministic or randomized, depending on whether opt_rand is set to a fixed value or a random one. When opt_rand is set to a public seed (from the public key), SLH-DSA produces deterministic signatures, meaning signing the same message twice will result in the same signature.
 
