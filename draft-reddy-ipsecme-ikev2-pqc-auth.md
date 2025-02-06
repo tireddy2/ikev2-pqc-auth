@@ -138,7 +138,7 @@ The implementation MUST send a SIGNATURE_HASH_ALGORITHMS notify with an Identity
 ML-DSA and SLH-DSA are only defined with the "Identity" hash and MUST NOT be sent to a receiver that has not indicated support for the "Identity" hash.
 
 When generating a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be signed (along with the fixed context string "IKEv2 Auth" (`49 4b 45 76 32 20 41 55 54 48`).
-The resulting signature is placed into the The resulting signature is the Signature Value.
+The resulting signature is placed into the Signature Value field of the Authentication Payload.
 
 When verifying a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be verified (along with the fixed context string "IKEv2 Auth".
 
