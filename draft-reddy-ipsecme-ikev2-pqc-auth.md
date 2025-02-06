@@ -137,10 +137,10 @@ For integrating ML-DSA and SLH-DSA into IKEv2, we take the approach used in [RFC
 The implementation MUST send a SIGNATURE_HASH_ALGORITHMS notify with an Identity" (5) hash function.
 ML-DSA and SLH-DSA are only defined with the "Identity" hash and MUST NOT be sent to a receiver that has not indicated support for the "Identity" hash.
 
-When generating a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be signed (along with the fixed context string "IKEv2 Auth" (`49 4b 45 76 32 20 41 55 54 48`).
+When generating a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be signed (with no context string).
 The resulting signature is placed into the Signature Value field of the Authentication Payload.
 
-When verifying a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be verified (along with the fixed context string "IKEv2 Auth".
+When verifying a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be verified (with no context string).
 
 ## Discuession of ML-DSA and SLH-DSA and Prehashing
 
@@ -165,17 +165,6 @@ The third way is what we can refer to as 'fake prehashing'; IKEv2 would generate
 This is a violation of the spirit, if not the letter of FIPS 204, 205
 However, it is secure (assuming the hash function is strong), and fits in cleanly with both the existing IKEv2 architecture, and what crypto libraries provide.
 On the other hand, for SLH-DSA, this means that we're now dependent on collision resistance (while the rest of the SLH-DSA architecture was carefully designed not to be).
-
-## Context String
-
-An additional feature that ML-DSA, SLH-DSA provide it allows the signer and the verifier to provide a 'context string'.
-The signature would verify only if the context strings that are provided by both the signer and the verifier match.
-The reason behind this is to ensure that if a public key is used for multiple purposes, a signature for one purpose cannot be used by an adversary in another.
-In our case, if the same certificate where used to sign both IKEv2 and TLS exchanges, an adversary could not possibly take the signature from an TLS exchange and try to use it within an IKEv2 exchange.
-
-This really is not a necessary security safe guard; the messages that are actually signed in both cases are distinct enough that an adversary could not actually take advantage of this, even without the protection.
-
-However, given that ML-DSA and SLH-DSA do provide such a service, and it appears that crypto libraries do support a nonempty context, we cannot see a reason not to use it.
 
 # Use of ML-DSA and SLH-DSA
 
