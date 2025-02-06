@@ -142,7 +142,7 @@ The resulting signature is placed into the Signature Value field of the Authenti
 
 When verifying a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be verified (with no context string).
 
-## Discuession of ML-DSA and SLH-DSA and Prehashing
+## Discussion of ML-DSA and SLH-DSA and Prehashing
 
 The signature architecture within IKE was designed around RSA (and later extended to ECDSA).
 In this architecture, the actual message (the SignedOctets) are first hashed (using a hash that the verifier has indicated support for), and then passed for the remaining part of the signature generation processing.
