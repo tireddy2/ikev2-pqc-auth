@@ -70,10 +70,6 @@ informative:
       target: https://www.iacr.org/archive/asiacrypt2009/59120596/59120596.pdf
       date: false
   RFC8420:
-  MLDSACert:
-      title: Internet X.509 Public Key Infrastructure: Algorithm Identifiers for ML-DSA
-      target: https://datatracker.ietf.org/doc/draft-ietf-lamps-dilithium-certificates/07
-      date: true
 ---
 
 --- abstract
@@ -150,7 +146,7 @@ When verifying a signature with ML-DSA or SLH-DSA, the IKEv2 implementation woul
 With ML-DSA, there are two different approaches to implementing the signature process.
 The first one is to simply hand the SignedOctets string to the crypto library to generate the full signature; this works for SLH-DSA as well.
 
-The second one is to use the ExternalMu-ML-DSA API [MLDSACert].  Here, the implementation woudl call ExternalMU-ML-DSA.Prehash API with the SignedOctets string and the ML-DSA public key, and it would generate an internmediate hash.
+The second one is to use the ExternalMu-ML-DSA API.  Here, the implementation woudl call ExternalMU-ML-DSA.Prehash API with the SignedOctets string and the ML-DSA public key, and it would generate an internmediate hash.
 Then, you would pass that intermediate hash to the crypto library to perform the ExternalMU-ML-DSA.Sign API, which would take the hash and the ML-DSA private key to generate the signature.
 
 These methods are equivalent, and so either may be used.
