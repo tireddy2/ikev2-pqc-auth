@@ -70,6 +70,10 @@ informative:
       target: https://www.iacr.org/archive/asiacrypt2009/59120596/59120596.pdf
       date: false
   RFC8420:
+  MLDSACert:
+      title: Internet X.509 Public Key Infrastructure: Algorithm Identifiers for ML-DSA
+      target: https://datatracker.ietf.org/doc/draft-ietf-lamps-dilithium-certificates/07/
+      date: true
 
 ---
 
@@ -142,7 +146,19 @@ The resulting signature is placed into the Signature Value field of the Authenti
 
 When verifying a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be verified (with no context string).
 
+## Implementation Alternatives for ML-DSA
+
+With ML-DSA, there are two different approaches to implementing the signature process.
+The first one is to simply hand the SignedOctets string to the crypto library to generate the full signature; this works for SLH-DSA as well.
+
+The second one is to use the ExternalMu-ML-DSA API [MLDSACert].  Here, the implementation woudl call ExternalMU-ML-DSA.Prehash API with the SignedOctets string and the ML-DSA public key, and it would generate an internmediate hash.
+Then, you would pass that intermediate hash to the crypto library to perform the ExternalMU-ML-DSA.Sign API, which would take the hash and the ML-DSA private key to generate the signature.
+
+These methods are equivalent, and so either may be used.
+
 ## Discussion of ML-DSA and SLH-DSA and Prehashing
+
+This section discusses possible ways to integrate ML-DSA, SLH-DSA into IKEv2, and no only the method proposed above.
 
 The signature architecture within IKE was designed around RSA (and later extended to ECDSA).
 In this architecture, the actual message (the SignedOctets) are first hashed (using a hash that the verifier has indicated support for), and then passed for the remaining part of the signature generation processing.
