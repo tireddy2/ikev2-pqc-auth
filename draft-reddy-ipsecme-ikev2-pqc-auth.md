@@ -72,9 +72,8 @@ informative:
   RFC8420:
   MLDSACert:
       title: Internet X.509 Public Key Infrastructure: Algorithm Identifiers for ML-DSA
-      target: https://datatracker.ietf.org/doc/draft-ietf-lamps-dilithium-certificates/07/
+      target: https://datatracker.ietf.org/doc/draft-ietf-lamps-dilithium-certificates/07
       date: true
-
 ---
 
 --- abstract
