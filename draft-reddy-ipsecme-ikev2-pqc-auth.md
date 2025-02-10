@@ -131,9 +131,9 @@ SLH-DSA does not introduce a new hardness assumption beyond those inherent to th
 
 # Signature Algorithm Use and Hashing in IKEv2 with ML-DSA and SLH-DSA
 
-For integrating ML-DSA and SLH-DSA into IKEv2, we take the approach used in [RFC8420]
+For integrating ML-DSA and SLH-DSA into IKEv2, the approach used in [RFC8420] is followed.
 
-The implementation MUST send a SIGNATURE_HASH_ALGORITHMS notify with an Identity" (5) hash function.
+The implementation MUST send a SIGNATURE_HASH_ALGORITHMS notify with an "Identity" (5) hash function.
 ML-DSA and SLH-DSA are only defined with the "Identity" hash and MUST NOT be sent to a receiver that has not indicated support for the "Identity" hash.
 
 When generating a signature with ML-DSA or SLH-DSA, the IKEv2 implementation would take the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically send it to the identity hash (which leaves it unchanged), and then pass it into the ML-DSA or SLH-DSA signer as the message to be signed (with no context string).
@@ -146,14 +146,13 @@ When verifying a signature with ML-DSA or SLH-DSA, the IKEv2 implementation woul
 With ML-DSA, there are two different approaches to implementing the signature process.
 The first one is to simply hand the SignedOctets string to the crypto library to generate the full signature; this works for SLH-DSA as well.
 
-The second one is to use the ExternalMu-ML-DSA API.  Here, the implementation woudl call ExternalMU-ML-DSA.Prehash API with the SignedOctets string and the ML-DSA public key, and it would generate an internmediate hash.
-Then, you would pass that intermediate hash to the crypto library to perform the ExternalMU-ML-DSA.Sign API, which would take the hash and the ML-DSA private key to generate the signature.
+The second approach involves using the ExternalMu-ML-DSA API defined in {{?I-D.ietf-lamps-dilithium-certificates}}. In this method, the implementation calls the ExternalMU-ML-DSA.Prehash API with the SignedOctets string and the ML-DSA public key, generating an hash. This  hash is then passed to the cryptographic library to execute the ExternalMU-ML-DSA.Sign API, which takes the hash and the ML-DSA private key to produce the signature.
 
 These methods are equivalent, and so either may be used.
 
 ## Discussion of ML-DSA and SLH-DSA and Prehashing
 
-This section discusses possible ways to integrate ML-DSA, SLH-DSA into IKEv2, and no only the method proposed above.
+This section discusses various approaches for integrating ML-DSA and SLH-DSA into IKEv2, not just the method proposed above.
 
 The signature architecture within IKE was designed around RSA (and later extended to ECDSA).
 In this architecture, the actual message (the SignedOctets) are first hashed (using a hash that the verifier has indicated support for), and then passed for the remaining part of the signature generation processing.
@@ -165,17 +164,17 @@ We see three ways to address this mismatch.
 The first is to note that both ML-DSA and SLH-DSA have prehashed parameter sets; that is, ones designed to sign a message that has been hashed by an external source.
 At first place, this would appear to be an ideal solution, however it turns out that there are a number of practical issues.
 The first is that the prehashed version of ML-DSA and SLH-DSA would appear to be rarely used, and so it is not unlikely that support for it within crypto libraries may be lacking.
-The second is that the public keys for the prehashed versions use different OIDs; this means that the certificates for IKEv2 would necessarily be different than certificates for other protocols (and some CAs might not support issuing certificates for prehashed ML-DSA or prehashed SLH-DSA, again because of the lack of use).
-The third is that some users have expressed a desire not to use the prehashed parameter sets.
+The second point is that the public keys for the prehashed versions use different OIDs; this means that the certificates for IKEv2 would necessarily be different than certificates for other protocols (and some CAs might not support issuing certificates for prehashed ML-DSA or prehashed SLH-DSA, again because of the lack of use).
+The third point is that some users have expressed a desire not to use the prehashed parameter sets.
 
 The second is to note that, while IKEv2 normally acts this way, it doesn't always.
 EdDSA has a similar constraint on not working cleanly with the standard 'hash and then sign' paradigm, and so the existing [RFC8420] provides an alternative method, which ML-DSA would cleanly fit into.
 We could certainly adopt this same strategy; our concern would be that it might be more difficult for IKEv2 implementors which do not already have support for EdDSA.
 
-The third way is what we can refer to as 'fake prehashing'; IKEv2 would generate the hash as current, but instead of running ML-DSA or SLH-DSA in prehash mode, we have itsign it in pure mode as if it was the message.
-This is a violation of the spirit, if not the letter of FIPS 204, 205
-However, it is secure (assuming the hash function is strong), and fits in cleanly with both the existing IKEv2 architecture, and what crypto libraries provide.
-On the other hand, for SLH-DSA, this means that we're now dependent on collision resistance (while the rest of the SLH-DSA architecture was carefully designed not to be).
+The third way is what we can refer to as 'fake prehashing'; IKEv2 would generate the hash as current, but instead of running ML-DSA or SLH-DSA in prehash mode, we have it sign it in pure mode as if it was the message.
+This is a violation of the spirit, if not the letter of FIPS 204, 205. 
+However, it is secure (assuming the hash function is strong), and fits in cleanly with both the existing IKEv2 architecture, and what crypto libraries provide. A key challenge, however, is that the hash function must be explicitly defined and negotiated within IKEv2 to ensure interoperability.
+Additionally, for SLH-DSA, this means that we're now dependent on collision resistance (while the rest of the SLH-DSA architecture was carefully designed not to be).
 
 # Use of ML-DSA and SLH-DSA
 
