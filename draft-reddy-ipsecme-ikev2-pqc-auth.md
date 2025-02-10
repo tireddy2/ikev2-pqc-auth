@@ -161,11 +161,14 @@ Neither ML-DSA nor SLH-DSA fits cleanly into this architecture.
 
 We see three ways to address this mismatch.
 
-The first is to note that both ML-DSA and SLH-DSA have prehashed parameter sets; that is, ones designed to sign a message that has been hashed by an external source.
-At first place, this would appear to be an ideal solution, however it turns out that there are a number of practical issues.
-The first is that the prehashed version of ML-DSA and SLH-DSA would appear to be rarely used, and so it is not unlikely that support for it within crypto libraries may be lacking.
-The second point is that the public keys for the prehashed versions use different OIDs; this means that the certificates for IKEv2 would necessarily be different than certificates for other protocols (and some CAs might not support issuing certificates for prehashed ML-DSA or prehashed SLH-DSA, again because of the lack of use).
-The third point is that some users have expressed a desire not to use the prehashed parameter sets.
+The first consideration is that both ML-DSA and SLH-DSA provide prehashed parameter sets, which are designed to sign messages that have already been hashed by an external source. At first glance, this might seem like an ideal solution. However, several practical challenges arise:
+
+1. 
+   The prehashed versions of ML-DSA and SLH-DSA appear to be rarely used, making it likely that support for them in cryptographic libraries is limited or unavailable.
+2. 
+   The public keys for the prehashed variants use different OIDs, which means that certificates for IKEv2 would differ from those used in other protocols. Additionally, some certificate authorities (CAs) may not support issuing certificates for prehashed ML-DSA or SLH-DSA due to their limited adoption.
+3. 
+   Some users have explicitly indicated a preference not to use the prehashed parameter sets.
 
 The second is to note that, while IKEv2 normally acts this way, it doesn't always.
 EdDSA has a similar constraint on not working cleanly with the standard 'hash and then sign' paradigm, and so the existing [RFC8420] provides an alternative method, which ML-DSA would cleanly fit into.
