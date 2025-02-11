@@ -220,5 +220,5 @@ The Security Considerations section of {{?I-D.ietf-lamps-dilithium-certificates}
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to Stefaan De Cnodder for the discussion and comments.
+Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, and Daniel Van Geest for the discussion and comments.
 
