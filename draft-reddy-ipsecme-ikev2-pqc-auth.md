@@ -1,6 +1,6 @@
 ---
-title: "Signature Authentication in the Internet Key Exchange Version 2 (IKEv2) using PQC"
-abbrev: "Signature Authentication in IKEv2 using PQC"
+title: "Signature Authentication in the Internet Key Exchange Version 2 (IKEv2) using ML-DSA and SLH-DSA"
+abbrev: "ML-DSA & SLH-DSA Authentication in IKEv2"
 category: std
 
 docname: draft-reddy-ipsecme-ikev2-pqc-auth
@@ -76,7 +76,7 @@ informative:
 
 Signature-based authentication methods are utilized in IKEv2 {{?RFC7296}}. The current version of the Internet Key Exchange Version 2 (IKEv2) protocol supports traditional digital signatures.
 
-This document outlines how post-quantum digital signatures, specifically Module-Lattice-Based Digital Signatures (ML-DSA) and Stateless Hash-Based Digital Signatures (SLH-DSA), can be employed as authentication methods within the IKEv2 protocol. It introduces ML-DSA and SLH-DSA capability to IKEv2 without necessitating any alterations to existing IKE operations.
+This document outlines how post-quantum digital signatures, specifically Module-Lattice-Based Digital Signatures (ML-DSA) and Stateless Hash-Based Digital Signatures (SLH-DSA), can be employed as authentication methods within the IKEv2 protocol. It adds ML-DSA and SLH-DSA capabilities to IKEv2 while preserving existing IKEv2 operations.
 
 --- middle
 
