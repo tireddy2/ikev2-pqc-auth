@@ -1,6 +1,6 @@
 ---
 title: "Signature Authentication in the Internet Key Exchange Version 2 (IKEv2) using ML-DSA and SLH-DSA"
-abbrev: "Signature Authentication in IKEv2 using ML-DSA and SLH-DSA"
+abbrev: "ML_DSA & SLH-DSA Authentication in IKEv2"
 category: std
 
 docname: draft-reddy-ipsecme-ikev2-pqc-auth
