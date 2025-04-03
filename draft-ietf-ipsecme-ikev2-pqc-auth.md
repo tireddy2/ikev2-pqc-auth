@@ -115,7 +115,7 @@ If the PQC signature algorithm uses a 'context' input parameter, it will be set 
 
 Certain digital signature algorithms support two modes: pure mode and pre-hash mode. In contrast, pre-hash mode involves signing a digest of the message. This document specifies the use of pure mode for signature-based authentication in IKEv2, where the message is signed directly along with domain separation information.
 The data used for authentication in IKEv2, as described in Section 2.15 of {{!RFC7296}}, consists of elements such as nonces, SPIs, and initial exchange messages, which are typically within device memory constraints.
-As discussed in {#pre-hash}, while pre-hash mode was considered for integration into IKEv2, various practical challenges led to the adoption of pure mode.
+As discussed in {{pre-hash}}, while pre-hash mode was considered for integration into IKEv2, various practical challenges led to the adoption of pure mode.
 
 ### Handling PQC Signatures in IKEv2
 
@@ -176,7 +176,7 @@ hash is then passed to the cryptographic library to execute the ExternalMU-ML-DS
 
 These methods are equivalent, and so either may be used.
 
-# Discussion of ML-DSA and SLH-DSA and Prehashing {{pre-hash}}
+# Discussion of ML-DSA and SLH-DSA and Prehashing {#pre-hash}
 
 This section discusses various approaches for integrating ML-DSA and SLH-DSA into IKEv2, not just the method proposed above.
 
