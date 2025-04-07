@@ -47,6 +47,7 @@ author:
     email: "sfluhrer@cisco.com"
 
 normative:
+  RFC9593:
 
 informative:
   FIPS204:
@@ -138,7 +139,7 @@ The following mechanisms can be used by peers to signal the types of public/priv
 - Certificate Request Payload: One method to ascertain that the key pair type the initiator wants the responder
   to use is through a Certificate Request payload sent by the initiator. For example, the initiator can specify that it trusts certificates issued by a certificate authority (CA) that signs with a particular post-quantum cryptographic (PQC) signature algorithm. This implies that the initiator can process signatures generated using that algorithm, thereby allowing the responder to authenticate itself using a key pair associated with the specified PQC signature scheme.
 
-- Authentication Method Announcement: Another method is to utilize {{?I-D.ietf-ipsecme-ikev2-auth-announce}},     
+- Authentication Method Announcement: Another method is to utilize {{RFC9593}},     
   which enables peers to declare their supported authentication methods. This improves interoperability when IKEv2 peers are configured with multiple credential types of different type to authenticate each other. The responder includes a SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT response message, listing the PQC signature scheme(s) it supports. The initiator includes the SUPPORTED_AUTH_METHODS notification in either the IKE_AUTH request message or in the IKE_INTERMEDIATE request. This notification lists the PQC digital signature scheme(s) supported by the initiator, ordered by preference.
 
 # Specifying ML-DSA within IKEv2 {#ml-dsa}
