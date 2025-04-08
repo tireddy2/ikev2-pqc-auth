@@ -1,5 +1,5 @@
 ---
-title: "Signature Authentication in the Internet Key Exchange Version 2 (IKEv2) using using PQC"
+title: "Signature Authentication in the Internet Key Exchange Version 2 (IKEv2) using PQC"
 abbrev: "PQC Authentication in IKEv2"
 category: std
 
@@ -118,9 +118,10 @@ In the context of signature-based authentication in IKEv2, the data used for gen
 
 If the PQC signature algorithm uses a 'context' input parameter, it will be set to an empty string.
 
-Certain digital signature algorithms support two modes: pure mode and pre-hash mode. In contrast, pre-hash mode involves signing a digest of the message. This document specifies the use of pure mode for signature-based authentication in IKEv2, where the message is signed directly along with domain separation information.
-The data used for authentication in IKEv2, as described in Section 2.15 of {{!RFC7296}}, consists of elements such as nonces, SPIs, and initial exchange messages, which are typically within device memory constraints.
-As discussed in {{pre-hash}}, while pre-hash mode was considered for integration into IKEv2, various practical challenges led to the adoption of pure mode.
+Certain digital signature algorithms support two modes: pure mode and pre-hash mode. For example, ML-DSA and
+SLH-DSA support both modes. In pure mode, the content is signed directly along with some domain separation
+information. In contrast, pre-hash mode involves signing a digest of the message. This document specifies the use
+of pure mode for signature-based authentication in IKEv2, where the message is signed directly along with domain separation information. The data used for authentication in IKEv2, as described in Section 2.15 of {{!RFC7296}}, consists of elements such as nonces, SPIs, and initial exchange messages, which are typically within device memory constraints. As discussed in {{pre-hash}}, while pre-hash mode was considered for integration into IKEv2, various practical challenges led to the adoption of pure mode.
 
 ### Handling PQC Signatures in IKEv2
 
@@ -128,16 +129,16 @@ For integrating PQC signature algorithms into IKEv2, the approach used in {{RFC8
 
 The implementation MUST send a SIGNATURE_HASH_ALGORITHMS notify with an 'Identity' (5) hash function. PQC signature algorithms that inherently operate on the raw message without preprocessing are only defined with the 'Identity' hash and MUST NOT be used with a receiver that has not indicated support for the 'Identity' hash.
 
-When generating a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signer as the message to be signed (with no context string, if applicable). The resulting signature is placed into the Signature Value field of the Authentication Payload.
+When generating a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signer as the message to be signed (with empty context string, if applicable). The resulting signature is placed into the Signature Value field of the Authentication Payload.
 
-When verifying a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signature verifier as the message to be verified (with no context string, if applicable).
+When verifying a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signature verifier as the message to be verified (with empty context string, if applicable).
 
 ## Mechanisms for Signaling Supported Key Pair Types
 
 The following mechanisms can be used by peers to signal the types of public/private key pairs they support:
 
 - Certificate Request Payload: One method to ascertain that the key pair type the initiator wants the responder
-  to use is through a Certificate Request payload sent by the initiator. For example, the initiator can specify that it trusts certificates issued by a certificate authority (CA) that signs with a particular post-quantum cryptographic (PQC) signature algorithm. This implies that the initiator can process signatures generated using that algorithm, thereby allowing the responder to authenticate itself using a key pair associated with the specified PQC signature scheme.
+  to use is through a Certificate Request payload (Section 3.7 of {{!RFC7296}}) sent by the initiator. For example, the initiator can specify that it trusts certificates issued by a certificate authority (CA) that signs with a particular post-quantum cryptographic (PQC) signature algorithm. This implies that the initiator can process signatures generated using that algorithm, thereby allowing the responder to authenticate itself using a key pair associated with the specified PQC signature scheme.
 
 - Authentication Method Announcement: Another method is to utilize {{RFC9593}},     
   which enables peers to declare their supported authentication methods. This improves interoperability when IKEv2 peers are configured with multiple credential types of different type to authenticate each other. The responder includes a SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT response message, listing the PQC signature scheme(s) it supports. The initiator includes the SUPPORTED_AUTH_METHODS notification in either the IKE_AUTH request message or in the IKE_INTERMEDIATE request. This notification lists the PQC digital signature scheme(s) supported by the initiator, ordered by preference.
