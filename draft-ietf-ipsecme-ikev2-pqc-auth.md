@@ -106,7 +106,7 @@ into two classes:
 IKEv2 authentication commonly relies on digital signatures to verify the identity of communicating peers. The mechanism described in this document enables the use of any PQC digital signature algorithm without modifying core IKEv2 operations. 
 
 ## Specifying PQC Signature Algorithms
-- IKEv2 can use arbitrary signature algorithms as described in {{!RFC7427}}, where the "Digital Signature" authentication method supersedes previously defined signature authentication methods. Any PQC digital signature algorithm can be incorporated using the "Signature Algorithm" field in authentication payloads, as defined in [RFC7427].
+- IKEv2 can use arbitrary signature algorithms as described in {{!RFC7427}}, where the "Digital Signature" authentication method supersedes previously defined signature authentication methods. Any PQC digital signature algorithm can be incorporated using the "Signature Algorithm" field in authentication payloads, as defined in {{RFC7427}}.
 - AlgorithmIdentifier ASN.1 objects will be used to uniquely identify PQC signature algorithm scheme and the parameter set associated with it.
 
 ## Signature Generation and Verification {#sig}
@@ -136,6 +136,9 @@ When generating a signature with a PQC signature algorithm, the IKEv2 implementa
 
 When verifying a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signature verifier as the message to be verified (with empty context string, if applicable).
 
+IKEv2 peers supporting the PQC authentication mechanism defined in this specification SHOULD implement IKEv2 message fragmentation as specified in {{!RFC7383}}, unless IKEv2 runs over a reliable transport (e.g., {{?RFC9329}}) or the underlying network is known to support sufficiently large MTUs without fragmentation issues, since PQC public keys and signatures can be significantly larger than those used in traditional algorithms. 
+For example, ML-DSA-44 requires a public key of 1,312 bytes and a signature of 2,420 bytes, while even the smallest SLH-DSA signature is around 7,856 bytes. As guidance, IKEv2 peers should assume a minimum PMTU of 1280 bytes for IPv6 (per {{?RFC8200}}) and, where legacy IPv4 networks are a consideration, an effective MTU of 576 bytes for IPv4 (per {{?RFC1122}}).
+
 ## Mechanisms for Signaling Supported Key Pair Types
 
 The following mechanisms can be used by peers to signal the types of digital signature algorithms and parameters they support:
@@ -159,7 +162,7 @@ ML-DSA is instantiated with 3 parameter sets for the security categories 2, 3, a
 
 SLH-DSA {{FIPS205}} utilizes the concept of stateless hash-based signatures. In contrast to stateful signature algorithms, SLH-DSA eliminates the need for maintaining state information during the signing process. SLH-DSA is designed to sign up to 2^64 messages and it offers three security levels. The parameters for security levels 1, 3, and 5 were chosen to provide AES-128, AES-192, and AES-256 bits of security respectively (see Table 2 in Section 10 of {{?I-D.ietf-pquip-pqc-engineers}}). This document specifies the use of the SLH-DSA algorithm in IKEv2 at each level.
 
-Each security level (1, 3, and 5) defines two variants of the algorithm: a small (S) version and a fast (F) version. The small version prioritizes smaller signature sizes, making them suitable for resource-constrained environments IoT devices. Conversely, the fast version prioritizes speed over signature size, minimizing the time required to generate signatures. However, signature verification with the small version is faster than with the fast version. For hash function selection, the algorithm uses SHA-256 ({{FIPS180}}) for security level 1 and SHA-512 ({{FIPS180}}) for security levels 3 and 5. Alternatively, SHAKE256 ({{FIPS202}}) can be used across all security levels.
+Each security level (1, 3, and 5) defines two variants of the algorithm: a small (S) version and a fast (F) version. The small version prioritizes smaller signature sizes, making them suitable for resource-constrained  IoT devices. Conversely, the fast version prioritizes speed over signature size, minimizing the time required to generate signatures. However, signature verification with the small version is faster than with the fast version. For hash function selection, the algorithm uses SHA-256 ({{FIPS180}}) for security level 1 and both SHA-256 and SHA-512 ({{FIPS180}}) for security levels 3 and 5. Alternatively, SHAKE256 ({{FIPS202}}) can be used across all security levels.
 
 ML-DSA outperforms SLH-DSA in both signature generation and validation time, as well as signature size. SLH-DSA, in contrast, offers smaller key sizes but larger signature sizes.
 
@@ -236,6 +239,8 @@ Different PQC signature schemes are designed to provide security levels comparab
 ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256, AES-192, and AES-256 respectively. Similarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-{SHA2,SHAKE}, and SLH-DSA-256{S,F}-{SHA2,SHAKE} are designed to offer security comparable with the AES-128, AES-192, and AES-256 respectively.
 
 The Security Considerations section of {{?I-D.ietf-lamps-dilithium-certificates}} and {{?I-D.ietf-lamps-x509-slhdsa}} apply to this specification as well.
+
+SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that even a IKEv2 server establishing IKEv2 sessions at an extremely high rate could not realistically reach it (at 10 billion signatures per second, it would still take over 58 years). The limit is therefore of theoretical interest only, but implementations may still track signature usage as a precautionary security measure.
 
 # Acknowledgements
 {:numbered="false"}
