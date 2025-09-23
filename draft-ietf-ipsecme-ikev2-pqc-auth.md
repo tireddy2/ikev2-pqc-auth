@@ -230,7 +230,9 @@ In the deterministic variant, rnd is instead set to a constant 256-bit zero stri
 
 IKEv2 peers can use either the hedged or deterministic variants of ML-DSA and SLH-DSA for authentication in IKEv2, with a preference for using the hedged mode ({{sig}}).
 
-The three security levels of ML-DSA are identified via AlgorithmIdentifier ASN.1 objects, as specified in {{I-D.ietf-lamps-dilithium-certificates}}. The different combinations of SLH-DSA are identified via AlgorithmIdentifier ASN.1 objects, as specified in {{I-D.ietf-lamps-x509-slhdsa}}. Both ML-DSA and SLH-DSA define two signature modes: pure mode and pre-hash mode, as specified in {{FIPS204}} and {{FIPS205}}, respectively. Both {{FIPS204}} and {{FIPS205}} prefer pure mode over pre-hash mode, and neither {{I-D.ietf-lamps-dilithium-certificates}} nor {{I-D.ietf-lamps-x509-slhdsa}} discusses pre-hash mode. 
+The three security levels of ML-DSA are identified via AlgorithmIdentifier ASN.1 objects, as specified in {{I-D.ietf-lamps-dilithium-certificates}}. {{FIPS204}} defines both a pure and a pre-hash variant of ML-DSA, but {{I-D.ietf-lamps-dilithium-certificates}} specifies only the pure variant. 
+
+The different combinations of SLH-DSA are identified via AlgorithmIdentifier ASN.1 objects, as specified in {{I-D.ietf-lamps-x509-slhdsa}}. {{FIPS205}} defines two signature modes: pure mode and pre-hash mode. {{I-D.ietf-lamps-x509-slhdsa}} specifies the use of both Pure SLH-DSA and HashSLH-DSA in Public Key Infrastructure X.509 (PKIX) certificates and Certificate Revocation Lists (CRLs).
 
 # Security Considerations
 
