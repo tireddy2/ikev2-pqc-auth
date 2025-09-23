@@ -111,7 +111,9 @@ IKEv2 authentication commonly relies on digital signatures to verify the identit
 
 ## Signature Generation and Verification {#sig}
 
-PQC signatures may be generated in either deterministic or hedged modes. In the deterministic mode, the signature is derived entirely from the message and the signer’s private key, without introducing fresh randomness at signing time. While this eliminates reliance on an external random number generator (RNG), it increases susceptibility to side-channel attacks, particularly fault injection attacks. The terms deterministic and hedged  used in this document are in accordance with {{FIPS204}} and {{FIPS205}}, which define the ML-DSA and SLH-DSA algorithms. Future PQC signature algorithms may adopt different nomenclature, but will be expected to follow the same principles.
+PQC signatures may be generated in either deterministic or hedged modes. The terms deterministic and hedged  used in this document are in accordance with {{FIPS204}} and {{FIPS205}}, which define the ML-DSA and SLH-DSA algorithms. Future PQC signature algorithms may adopt different nomenclature, but will be expected to follow the same principles.
+
+In the deterministic mode, the signature is derived entirely from the message and the signer’s private key, without introducing fresh randomness at signing time. While this eliminates reliance on an external random number generator (RNG), it increases susceptibility to side-channel attacks, particularly fault injection attacks. 
 
 The hedged mode mitigates this risk by including precomputed randomness in the signer's private key and incorporating fresh randomness generated at signing time. This approach ensures protection against side-channel attacks.
 
