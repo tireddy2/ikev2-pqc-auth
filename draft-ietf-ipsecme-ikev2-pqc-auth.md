@@ -134,7 +134,7 @@ As specified in {{RFC7427}}, both the initiator and responder MUST send the SIGN
 
 For PQC signature algorithms that inherently operate directly on the raw message without hashing, such as ML-DSA and SLH-DSA, only the 'Identity' hash function is applicable. The 'Identity' hash function (value 5) is defined in Section 2 of {{RFC8420}} and indicates that the input message is used as-is, without any hash function applied. Therefore, implementations supporting such PQC signature algorithms MUST include the 'Identity' hash (5) in the SIGNATURE_HASH_ALGORITHMS notify. Furthermore, PQC signature algorithms requiring the 'Identity' hash MUST NOT be used with a peer that has not indicated support for the Identity hash in its notify payload.
 
-For additional background on design alternatives that were considered and the rationale for adopting the {{RFC8420}} approach approach as the cleanest and most secure method, see {{design}}.
+For additional background on design alternatives that were considered and the rationale for adopting the {{RFC8420}} approach as the cleanest and most secure method, see {{design}}.
 
 When generating a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signer as the message to be signed (with empty context string, if applicable). The resulting signature is placed into the Signature Value field of the Authentication Payload.
 
