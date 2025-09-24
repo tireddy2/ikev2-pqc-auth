@@ -124,7 +124,7 @@ If the PQC signature algorithm uses a 'context' input parameter, it MUST be set 
 Certain digital signature algorithms support two modes: "pure" mode and "pre-hash" mode. For example, ML-DSA and
 SLH-DSA support both modes. In pure mode, the content is signed directly along with some domain separation
 information. In contrast, pre-hash mode involves signing a digest of the message. This document specifies the use
-of pure mode for signature-based authentication in IKEv2, where the message is signed directly along with domain separation information. The data used for authentication in IKEv2, as described in Section 2.15 of {{!RFC7296}}, consists of elements such as nonces, SPIs, and initial exchange messages (messages preceding IKE_AUTH), which are typically within device memory constraints. While pre-hash mode can help in scenarios with memory constraints, the IKEv2 authentication data is generally small, and combined with other practical challenges (discussed in {{pre-hash}}), this document only specifies pure mode.
+of pure mode for signature-based authentication in IKEv2, where the message is signed directly along with domain separation information. The data used for authentication in IKEv2, as described in Section 2.15 of {{!RFC7296}}, consists of elements such as nonces, SPIs, and initial exchange messages (messages preceding IKE_AUTH), which are typically within device memory constraints. While pre-hash mode can help in scenarios with memory constraints, the IKEv2 authentication data is generally small, and combined with other practical challenges (discussed in {{design}}), this document only specifies pure mode.
 
 ### Handling PQC Signatures in IKEv2
 
@@ -133,6 +133,8 @@ For integrating PQC signature algorithms into IKEv2, the approach used in {{RFC8
 As specified in {{RFC7427}}, both the initiator and responder MUST send the SIGNATURE_HASH_ALGORITHMS notify payload in the IKE_SA_INIT exchange to indicate the set of hash algorithms they support for signature generation and verification. The SIGNATURE_HASH_ALGORITHMS notify payload contains a list of 2-octet hash algorithm identifiers, defined in the IANA "IKEv2 Hash Algorithms" registry.
 
 For PQC signature algorithms that inherently operate directly on the raw message without hashing, such as ML-DSA and SLH-DSA, only the 'Identity' hash function is applicable. The 'Identity' hash function (value 5) is defined in Section 2 of {{RFC8420}} and indicates that the input message is used as-is, without any hash function applied. Therefore, implementations supporting such PQC signature algorithms MUST include the 'Identity' hash (5) in the SIGNATURE_HASH_ALGORITHMS notify. Furthermore, PQC signature algorithms requiring the 'Identity' hash MUST NOT be used with a peer that has not indicated support for the Identity hash in its notify payload.
+
+For additional background on design alternatives that were considered and the rationale for adopting the {{RFC8420}} approach approach as the cleanest and most secure method, see {{design}}.
 
 When generating a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signer as the message to be signed (with empty context string, if applicable). The resulting signature is placed into the Signature Value field of the Authentication Payload.
 
@@ -195,34 +197,6 @@ hash is then passed to the cryptographic library to execute the ExternalMU-ML-DS
 
 Both methods produce the same ML-DSA signature and are fully interoperable. The choice between them depends on implementation preferences, such as whether the pre-hashing step is handled internally by the cryptographic module or performed explicitly by the IKEv2 implementation.
 
-# Discussion of ML-DSA and SLH-DSA and Prehashing {#pre-hash}
-
-This section discusses various approaches for integrating ML-DSA and SLH-DSA into IKEv2 other than those proposed above.
-
-The signature architecture within IKE was designed around RSA (and later extended to ECDSA).
-In this architecture, the actual message (the SignedOctets) are first hashed (using a hash that the verifier has indicated support for), and then passed for the remaining part of the signature generation processing.
-That is, it is designed for signature algorithms that first apply a hash function to the message and then perform processing on that hash. Neither ML-DSA nor SLH-DSA fits cleanly into this architecture.
-
-We see three ways to address this mismatch.
-
-The first consideration is that both ML-DSA and SLH-DSA provide prehashed parameter sets, which are designed to sign messages that have already been hashed by an external source. At first glance, this might seem like an ideal solution. However, several practical challenges arise:
-
-1. 
-   The prehashed versions of ML-DSA and SLH-DSA appear to be rarely used, making it likely that support for them in cryptographic libraries is limited or unavailable.
-2. 
-   The public keys for the prehashed variants use different OIDs, which means that certificates for IKEv2 would differ from those used in other protocols. This not only complicates certificate management but also adds protocol complexity if a peer needs to support both pure and prehashed variants. Additionally, some certificate authorities (CAs) may not support issuing certificates for prehashed ML-DSA or SLH-DSA due to their limited adoption.
-3. 
-   Some users have explicitly indicated a preference not to use the prehashed parameter sets.
-
-The second is to note that, while IKEv2 normally follows the 'hash and then sign' paradigm, it doesn't always.
-EdDSA has a similar constraint on not working cleanly with the standard 'hash and then sign' paradigm, and so the existing {{RFC8420}} provides an alternative method, which ML-DSA would cleanly fit into.
-We could certainly adopt this same strategy; our concern would be that it might be more difficult for IKEv2 implementors which do not already have support for EdDSA.
-
-The third way is what we can refer to as 'fake prehashing'; IKEv2 would generate the hash as specified by the pre-hash modes in {{FIPS204}} and {{FIPS205}}, but instead of running ML-DSA or SLH-DSA in prehash mode, the hash is signed as if it were the unhashed message, as is done in pure mode.
-This is a violation of the spirit, if not the letter of FIPS 204, 205. 
-However, it is secure (assuming the hash function is strong), and fits in cleanly with both the existing IKEv2 architecture, and what crypto libraries provide. 
-Additionally, for SLH-DSA, this means that we're now dependent on collision resistance (while the rest of the SLH-DSA architecture was carefully designed not to be).
-
 # Use of ML-DSA and SLH-DSA
 
 Both ML-DSA and SLH-DSA offer deterministic and hedged signing modes. By default, ML-DSA uses a hedged approach, where the random value rnd is a 256-bit string generated by an Random Bit Generator (RBG). The signature generation function utilizes this randomness along with the private key and the preprocessed message.
@@ -250,4 +224,38 @@ SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that e
 {:numbered="false"}
 
 Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Rebecca Guthrie and Daniel Van Geest for the discussion and comments.
+
+<!-- Start of Appendices -->
+
+--- back
+
+# Discussion of ML-DSA and SLH-DSA and Prehashing {#design}
+
+This section discusses various approaches for integrating ML-DSA and SLH-DSA into IKEv2 other than those proposed above.
+
+The signature architecture within IKE was designed around RSA (and later extended to ECDSA).
+In this architecture, the actual message (the SignedOctets) are first hashed (using a hash that the verifier has indicated support for), and then passed for the remaining part of the signature generation processing.
+That is, it is designed for signature algorithms that first apply a hash function to the message and then perform processing on that hash. Neither ML-DSA nor SLH-DSA fits cleanly into this architecture.
+
+We see three ways to address this mismatch.
+
+The first consideration is that both ML-DSA and SLH-DSA provide prehashed parameter sets, which are designed to sign messages that have already been hashed by an external source. At first glance, this might seem like an ideal solution. However, several practical challenges arise:
+
+1. 
+   The prehashed versions of ML-DSA and SLH-DSA appear to be rarely used, making it likely that support for them in cryptographic libraries is limited or unavailable.
+2. 
+   The public keys for the prehashed variants use different OIDs, which means that certificates for IKEv2 would differ from those used in other protocols. This not only complicates certificate management but also adds protocol complexity if a peer needs to support both pure and prehashed variants. Additionally, some certificate authorities (CAs) may not support issuing certificates for prehashed ML-DSA or SLH-DSA due to their limited adoption.
+3. 
+   Some users have explicitly indicated a preference not to use the prehashed parameter sets.
+
+The second is to note that, while IKEv2 normally follows the 'hash and then sign' paradigm, it doesn't always.
+EdDSA has a similar constraint on not working cleanly with the standard 'hash and then sign' paradigm, and so the existing {{RFC8420}} provides an alternative method, which ML-DSA would cleanly fit into.
+We could certainly adopt this same strategy; our concern would be that it might be more difficult for IKEv2 implementors which do not already have support for EdDSA.
+
+The third way is what we can refer to as 'fake prehashing'; IKEv2 would generate the hash as specified by the pre-hash modes in {{FIPS204}} and {{FIPS205}}, but instead of running ML-DSA or SLH-DSA in prehash mode, the hash is signed as if it were the unhashed message, as is done in pure mode.
+This is a violation of the spirit, if not the letter of FIPS 204, 205. 
+However, it is secure (assuming the hash function is strong), and fits in cleanly with both the existing IKEv2 architecture, and what crypto libraries provide. 
+Additionally, for SLH-DSA, this means that we're now dependent on collision resistance (while the rest of the SLH-DSA architecture was carefully designed not to be).
+
+After analysis, the IPSECME working group chose the approach in {{RFC8420}} as cryptographically most secure way to integrate PQC algorithms into IKEv2.
 
