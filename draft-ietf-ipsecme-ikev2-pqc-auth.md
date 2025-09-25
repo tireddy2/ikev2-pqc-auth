@@ -115,7 +115,9 @@ PQC signatures may be generated in either deterministic or hedged modes. The ter
 
 In the deterministic mode, the signature is derived entirely from the message and the signer’s private key, without introducing fresh randomness at signing time. While this eliminates reliance on an external random number generator (RNG), it increases susceptibility to side-channel attacks, particularly fault injection attacks. 
 
-The hedged mode mitigates this risk by including precomputed randomness in the signer's private key and incorporating fresh randomness generated at signing time. This approach ensures protection against side-channel attacks.
+The hedged mode provides some resistance against this risk by including precomputed randomness in the signer's private key and incorporating fresh randomness generated at signing time.
+This foils some side channel attack approaches, while providing no strength against others.
+That said, if security against side channel attacks are required, you should use an ML-DSA implementation that implements side channel resistance.
 
 In the context of signature-based authentication in IKEv2, the data used for generating a digital signature is unique for each session, as it includes session-specific information such as nonces, cryptographic parameters, and identifiers. PQC signature algorithms can leverage the hedged variant within IKEv2 to enhance security against side-channel attacks. The choice between deterministic and hedged signing modes does not impact interoperability because the verification process remains the same for both variants.
 
