@@ -194,8 +194,8 @@ SLH-DSA does not introduce a new hardness assumption beyond those inherent to th
 With ML-DSA, there are two different approaches to implementing the signature process.
 The first one is to simply hand the SignedOctets string to the cryptographic library to generate the full signature; this works for SLH-DSA as well.
 
-The second approach involves using the ExternalMu-ML-DSA API defined in {{?I-D.ietf-lamps-dilithium-certificates}}. In this method, the implementation calls the ExternalMU-ML-DSA.Prehash API with the SignedOctets string and the ML-DSA public key, generating a hash. This
-hash is then passed to the cryptographic library to execute the ExternalMU-ML-DSA.Sign API, which uses the hash and the ML-DSA private key to produce the signature. 
+The second approach involves using the External&mu;-ML-DSA API defined in {{?I-D.ietf-lamps-dilithium-certificates}}. In this method, the implementation calls the External&mu;-ML-DSA.Prehash API with the SignedOctets string and the ML-DSA public key, generating a hash. This
+hash is then passed to the cryptographic library to execute the External&mu;-ML-DSA.Sign API, which uses the hash and the ML-DSA private key to produce the signature. 
 
 Both methods produce the same ML-DSA signature and are fully interoperable. The choice between them depends on implementation preferences, such as whether the pre-hashing step is handled internally by the cryptographic module or performed explicitly by the IKEv2 implementation.
 
