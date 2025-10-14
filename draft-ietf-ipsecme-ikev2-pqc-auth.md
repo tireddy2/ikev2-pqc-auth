@@ -219,7 +219,7 @@ The different combinations of SLH-DSA are identified via AlgorithmIdentifier ASN
 
 # Security Considerations
 
-PQC signature algorithms are modeled under strong unforgeability against an adaptive chosen message attack (SUF-CMA). Examples include ML-DSA and SLH-DSA, which adhere to this security model.
+PQC signature algorithms are generally modeled to achieve strong unforgeability under adaptive chosen-message attacks (SUF-CMA; see Section 10.1.1 of {{?I-D.ietf-pquip-pqc-engineers}}). For example, ML-DSA provides SUF-CMA security. However, some algorithms, such as SLH-DSA, achieve existential unforgeability under chosen-message attacks (EUF-CMA; see Section 10.1.1 of {{?I-D.ietf-pquip-pqc-engineers}}). This distinction does not impact IKEv2, as the signed data in each session is unique due to the inclusion of nonces. Consequently, the oracle-based forgery attack scenarios in the EUF-CMA model do not arise in IKEv2.
 
 Different PQC signature schemes are designed to provide security levels comparable to well-established cryptographic primitives. For example, some schemes align with the NIST post-quantum security categories (Categories 1 through 5) as discussed in {{FIPS204}} and {{FIPS205}}. These categories specify target security strengths that correspond approximately to exhaustive key-search resistance for AES-128, AES-192, and AES-256, and collision-search resistance for SHA-256, SHA-384, and SHA-512. The choice of a PQC signature algorithm should be guided by the desired security level and performance requirements.
 
@@ -232,7 +232,7 @@ SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that e
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Rebecca Guthrie and Daniel Van Geest for the discussion and comments.
+Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, John Mattsson and Daniel Van Geest for the discussion and comments.
 
 <!-- Start of Appendices -->
 
