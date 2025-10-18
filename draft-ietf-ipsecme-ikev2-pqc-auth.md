@@ -138,6 +138,8 @@ of pure mode for signature-based authentication in IKEv2, where the message is s
 
 ### Handling PQC Signatures in IKEv2 {#handsig}
 
+For integrating PQC signature algorithms into IKEv2, the approach used in {{RFC8420}} is followed.
+
 As specified in {{RFC7427}}, both the initiator and responder MUST send the SIGNATURE_HASH_ALGORITHMS notify payload in the IKE_SA_INIT exchange to indicate the set of hash algorithms they support for signature generation and verification. The SIGNATURE_HASH_ALGORITHMS notify payload contains a list of 2-octet hash algorithm identifiers, defined in the IANA "IKEv2 Hash Algorithms" registry.
 
 For PQC signature algorithms that inherently operate directly on the raw message without hashing, such as ML-DSA and SLH-DSA, only the 'Identity' hash function is applicable. The 'Identity' hash function (value 5) is defined in Section 2 of {{RFC8420}} and indicates that the input message is used as-is, without any hash function applied. Therefore, implementations supporting such PQC signature algorithms MUST include the 'Identity' hash (5) in the SIGNATURE_HASH_ALGORITHMS notify. Furthermore, PQC signature algorithms requiring the 'Identity' hash MUST NOT be used with a peer that has not indicated support for the Identity hash in its notify payload.
@@ -167,14 +169,14 @@ In traditional IKEv2 deployments, peers often implicitly know the signature algo
 
 ML-DSA {{FIPS204}} is a digital signature algorithm based on the hardness lattice problems over module lattices (i.e., the Module Learning with Errors problem (MLWE)). The design of the algorithm is based on the "Fiat-Shamir with Aborts" {{Lyu09}} framework introduced by Lyubashevsky that leverages rejection sampling to render lattice- based FS schemes compact and secure. ML-DSA uses a uniform distribution over small integers for computing coefficients in error vectors, which simplifies implementation compared to schemes requiring discrete Gaussian sampling.
 
-ML-DSA is instantiated with three parameter sets for the security categories 2, 3, and 5 (see Table 2 in Section 10 of {{?I-D.ietf-pquip-pqc-engineers}}). Security properties of ML-DSA are discussed in Section 9 of {{?I-D.ietf-lamps-dilithium-certificates}}. This document specifies the use of the ML-DSA algorithm in IKEv2 at three security levels: ML-DSA-44, ML-DSA-65, and ML-DSA-87. The DER encodings of the AlgorithmIdentifier objects for ML-DSA-44, ML-DSA-65, and ML-DSA-87 are listed in {{ASN}}.
+ML-DSA is instantiated with three parameter sets for the security categories 2, 3, and 5 (see Table 2 in Section 10 of {{?I-D.ietf-pquip-pqc-engineers}}). Security properties of ML-DSA are discussed in Section 9 of {{?I-D.ietf-lamps-dilithium-certificates}}. This document specifies the use of the ML-DSA algorithm in IKEv2 at three security levels: ML-DSA-44, ML-DSA-65, and ML-DSA-87. 
 
 
 # Specifying SLH-DSA within IKEv2 {#slh-dsa}
 
 SLH-DSA {{FIPS205}} utilizes the concept of stateless hash-based signatures. In contrast to stateful signature algorithms such as XMSS {{?RFC8391}} or HSS/LMS {{?RFC8554}}, SLH-DSA eliminates the need for maintaining state information during the signing process. SLH-DSA is designed to sign up to 2^64 messages and it offers three security levels. The parameters for security levels 1, 3, and 5 were chosen to provide AES-128, AES-192, and AES-256 bits of security respectively (see Table 2 in Section 10 of {{?I-D.ietf-pquip-pqc-engineers}}). This document specifies the use of the SLH-DSA algorithm in IKEv2 at each level.
 
-Each security level (1, 3, and 5) defines two variants of the algorithm: a small (S) version and a fast (F) version. The small version prioritizes smaller signature sizes, making them suitable for resource-constrained  IoT devices. Conversely, the fast version prioritizes speed over signature size, minimizing the time required to generate signatures. However, signature verification with the small version is faster than with the fast version. For hash function selection, the algorithm uses SHA-256 ({{FIPS180}}) for security level 1 and both SHA-256 and SHA-512 ({{FIPS180}}) for security levels 3 and 5. Alternatively, SHAKE256 ({{FIPS202}}) can be used across all security levels. Those hash function selections are internal to SLH-DSA implementations, and are not to be confused with those in the SIGNATURE_HASH_ALGORITHMS notification payload.
+Each security level (1, 3, and 5) defines two variants of the algorithm: a small (S) version and a fast (F) version. The small version prioritizes smaller signature sizes, making them suitable for resource-constrained  IoT devices. Conversely, the fast version prioritizes speed over signature size, minimizing the time required to generate signatures. However, signature verification with the small version is faster than with the fast version. For hash function selection, the algorithm uses SHA-256 ({{FIPS180}}) for security level 1 and both SHA-256 and SHA-512 ({{FIPS180}}) for security levels 3 and 5. Alternatively, SHAKE256 ({{FIPS202}}) can be used across all security levels.
 
 ML-DSA outperforms SLH-DSA in both signature generation and validation time, as well as signature size. SLH-DSA, in contrast, offers smaller key sizes but larger signature sizes.
 
@@ -194,8 +196,6 @@ The following combinations are defined in SLH-DSA {{FIPS205}}:
 * SLH-DSA-256F-SHAKE
 
 SLH-DSA does not introduce a new hardness assumption beyond those inherent to the underlying hash functions. It builds upon established foundations in cryptography, making it a reliable and robust digital signature scheme in the face of a CRQC. While attacks on lattice-based schemes like ML-DSA are currently hypothetical at the time of writing this document, such attacks, if realized, could compromise their security. SLH-DSA would remain unaffected by these attacks due to its distinct mathematical foundations. This ensures the continued security of systems and protocols that utilize SLH-DSA for digital signatures.
-
-The DER encodings of the AlgorithmIdentifier objects for each SLH-DSA variant are listed in {{ASN}}.
 
 # Implementation Alternatives for ML-DSA
 
@@ -232,7 +232,7 @@ SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that e
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, John Mattsson and Daniel Van Geest for the discussion and comments.
+Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, John Mattsson and Daniel Van Geest for the discussion and comments.
 
 <!-- Start of Appendices -->
 
@@ -268,7 +268,7 @@ Additionally, for SLH-DSA, this means that we're now dependent on collision resi
 
 After analysis, the IPsecME working group selected the approach defined in {{RFC8420}}, the second method discussed above as the most cryptographically secure way to integrate PQC algorithms into IKEv2. The details are specified in {{handsig}}.
 
-# ASN.1 Objects {#ASN}
+# ASN.1 Objects
 
 This section lists ASN.1 objects for algorithms mentioned in the document in binary form.  
 This section is not normative, and these values should only be used as
