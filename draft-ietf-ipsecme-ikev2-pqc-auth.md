@@ -195,15 +195,6 @@ SLH-DSA does not introduce a new hardness assumption beyond those inherent to th
 
 The DER encodings of the AlgorithmIdentifier objects for each SLH-DSA variant are listed in {{ASN}}.
 
-# Implementation Alternatives for ML-DSA
-
-With ML-DSA, there are two different approaches to implementing the signature process.
-The first one is to provide the SignedOctets string to the cryptographic library to generate the full signature; this works for SLH-DSA as well.
-
-The second approach involves using the External&mu;-ML-DSA API defined in {{FIPS204}}. In this method, the implementation calls the External &mu; pre-hashing mode with the SignedOctets string and the ML-DSA public key, which externalizes the message pre-hashing originally performed inside the signing operation (see Appendix D of {{RFC9881}} for ML-DSA pre-hashing). The resulting &mu; value is then passed to the cryptographic library to execute the External&mu;-ML-DSA.Sign API, which uses &mu; and the ML-DSA private key to produce the signature. This document specifies only the use of ML-DSA's External &mu; mode and does not use HashML-DSA. This approach avoids requiring large message inputs to be processed within potentially constrained cryptographic modules, such as Hardware Security Modules (HSMs).
-
-Both approaches are considered "pure" mode and produce the same ML-DSA signature and are fully interoperable. The choice between them depends on implementation preferences, such as whether the External &mu; pre-hashing step is handled internally by the cryptographic module or performed explicitly by the IKEv2 implementation. 
-
 
 # Use of ML-DSA and SLH-DSA
 
@@ -238,6 +229,16 @@ and Daniel Van Geest for the discussion and comments.
 <!-- Start of Appendices -->
 
 --- back
+
+# Implementation Alternatives for ML-DSA
+
+With ML-DSA, there are two different approaches to implementing the signature process.
+The first one is to provide the SignedOctets string to the cryptographic library to generate the full signature; this works for SLH-DSA as well.
+
+The second approach involves using the External&mu;-ML-DSA API allowed by {{FIPS204}}; specifically by the comment to line 6 of algorithm 7 of FIPS 204.
+In this method, the implementation calls the External &mu; pre-hashing mode with the SignedOctets string and the ML-DSA public key, which externalizes the message pre-hashing originally performed inside the signing operation (see Appendix D of {{RFC9881}} for ML-DSA pre-hashing). The resulting &mu; value is then passed to the cryptographic library to execute the External&mu;-ML-DSA.Sign API, which uses &mu; and the ML-DSA private key to produce the signature. This document specifies only the use of ML-DSA's External &mu; mode and does not use HashML-DSA. This approach avoids requiring large message inputs to be processed within potentially constrained cryptographic modules, such as Hardware Security Modules (HSMs).
+
+Both approaches are considered "pure" mode and produce the same ML-DSA signature and are fully interoperable. The choice between them depends on implementation preferences, such as whether the External &mu; pre-hashing step is handled internally by the cryptographic module or performed explicitly by the IKEv2 implementation. 
 
 # ASN.1 Objects {#ASN}
 
