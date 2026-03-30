@@ -223,7 +223,7 @@ PQC signature algorithms are generally modeled to achieve strong unforgeability 
 
 Different PQC signature schemes are designed to provide security levels comparable to well-established cryptographic primitives. For example, some schemes align with the NIST post-quantum security categories (Categories 1 through 5) as discussed in ML-DSA  {{FIPS204}} and SLH-DSA {{FIPS205}}. These categories specify target security strengths that correspond approximately to exhaustive key-search resistance for AES-128, AES-192, and AES-256, and collision-search resistance for SHA-256, SHA-384, and SHA-512. The choice of a PQC signature algorithm should be guided by the desired security level and performance requirements.
 
-ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256 collision resistance, AES-192 key search, and AES-256 key search, respectively. Similarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-{SHA2,SHAKE}, and SLH-DSA-256{S,F}-{SHA2,SHAKE} are designed to offer security comparable with the AES-128, AES-192, and AES-256 respectively.
+ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256 collision resistance (which is a harder problem than AES-128 key search), AES-192 key search, and AES-256 key search, respectively. Similarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-{SHA2,SHAKE}, and SLH-DSA-256{S,F}-{SHA2,SHAKE} are designed to offer security comparable with the AES-128, AES-192, and AES-256 respectively.
 
 The Security Considerations section of PKIX Algorithm Identifiers for ML-DSA {{?RFC9881}} and PKIX Algorithm Identifiers for SLH-DSA {{?RFC9909}} apply to this specification as well.
 
