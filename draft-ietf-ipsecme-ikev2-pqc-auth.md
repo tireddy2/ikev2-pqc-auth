@@ -79,6 +79,7 @@ informative:
       title: "V. Lyubashevsky, “Fiat-Shamir With Aborts: Applications to Lattice and Factoring-Based Signatures“, ASIACRYPT 2009"
       target: https://www.iacr.org/archive/asiacrypt2009/59120596/59120596.pdf
       date: false
+  RFC5280:
 
 ---
 
@@ -242,11 +243,13 @@ Both approaches are considered "pure" mode and produce the same ML-DSA signature
 
 # ASN.1 Objects {#ASN}
 
-This section lists ASN.1 objects for algorithms mentioned in the document in binary form.  
+This section lists AlgorithmIdentifier ASN.1 objects for algorithms mentioned in the document in binary form.  
 This section is not normative, and these values should only be used as
 examples. If the ASN.1 object listed in this section and the ASN.1
 object specified by the algorithm differ, then the algorithm
 specification must be used.
+
+The generic format for the AlgorithmIdentifier ASN.1 object is defined in Section 4.1.1.2 of PKIX {{RFC5280}}.
 
 ## ML-DSA-44
 
