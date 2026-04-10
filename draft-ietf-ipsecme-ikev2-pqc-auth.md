@@ -85,7 +85,7 @@ informative:
 
 --- abstract
 
-Signature-based authentication methods are utilized in IKEv2 {{?RFC7296}}. The current version of the Internet Key Exchange Version 2 (IKEv2) protocol supports traditional digital signatures.
+Signature-based authentication methods are utilized in IKEv2. The current version of the Internet Key Exchange Version 2 (IKEv2) protocol, specified in RFC 7296,  supports traditional digital signatures.
 
 This document specifies a generic mechanism for integrating post-quantum cryptographic (PQC) digital signature algorithms into the IKEv2 protocol. The approach allows for seamless inclusion of any PQC signature scheme within the existing authentication framework of IKEv2. Additionally, it outlines how Module-Lattice-Based Digital Signatures (ML-DSA) and Stateless Hash-Based Digital Signatures (SLH-DSA), can be employed as authentication methods within the IKEv2 protocol, as they have been standardized by NIST.
 
@@ -208,6 +208,10 @@ The three security levels of ML-DSA are identified via AlgorithmIdentifier ASN.1
 
 The different parameter sets of SLH-DSA are identified via AlgorithmIdentifier ASN.1 objects, as specified in NIST {{CSOR}} and referenced in PKIX Algorithm
 Identifiers for the SLH-DSA {{RFC9909}}. {{FIPS205}} defines two signature modes: pure mode and pre-hash mode. PKIX Algorithm Identifiers for the SLH-DSA {{RFC9909}} specifies the use of both Pure SLH-DSA and HashSLH-DSA in Public Key Infrastructure X.509 (PKIX) certificates and Certificate Revocation Lists (CRLs).
+
+# IANA Considerations
+
+This document makes no requests to IANA.
 
 # Security Considerations
 
