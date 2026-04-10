@@ -115,7 +115,7 @@ IKEv2 authentication commonly relies on digital signatures to verify the identit
 
 ## Specifying PQC Signature Algorithms
 - IKEv2 can use arbitrary signature algorithms as described in Signature Authentication in IKEv2 {{!RFC7427}}, where the "Digital Signature" authentication method supersedes previously defined signature authentication methods. Any PQC digital signature algorithm can be incorporated using the "Signature Algorithm" field in the Authentication payloads, as defined in {{RFC7427}}.
-- DER encoded AlgorithmIdentifier ASN.1 objects will be used to uniquely identify PQC signature algorithm scheme and the parameter set associated with it. The AlgorithmIdentifier ASN.1 object is put into the Authentication Data field of the Authentication payload (see Figure 2 of {{RFC7427}} for details).
+- DER encoded AlgorithmIdentifier ASN.1 objects will be used to uniquely identify PQC signature algorithm scheme and the parameter set associated with it. The AlgorithmIdentifier ASN.1 object is placed in the Authentication Data field of the Authentication payload (see Figure 2 of {{RFC7427}} for details).
 
 ## Signature Generation and Verification {#sig}
 
