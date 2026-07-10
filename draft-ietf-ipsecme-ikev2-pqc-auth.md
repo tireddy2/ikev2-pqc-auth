@@ -82,7 +82,7 @@ informative:
   RFC5280:
   IANA-IKEv2-Hash:
     target: https://www.iana.org/assignments/ikev2-parameters/ikev2-parameters.xhtml#hash-algorithms
-    title: "Internet Key Exchange Version 2 (IKEv2) Parameters"
+    title: "Internet Key Exchange Version 2 (IKEv2) Parameters. IKEv2 Hash Algorithms"
     author:
       org: "IANA"
     date: false
