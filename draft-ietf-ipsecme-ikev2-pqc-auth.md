@@ -125,13 +125,13 @@ IKEv2 authentication commonly relies on digital signatures to verify the identit
 
 ## Signature Generation and Verification {#sig}
 
-PQC signatures may be generated in either deterministic or hedged modes. The terms deterministic and hedged used in this document are in accordance with ML-DSA {{FIPS204}} and SLH-DSA {{FIPS205}}, which define the ML-DSA and SLH-DSA algorithms. Future PQC signature algorithms may adopt different nomenclature, but will be expected to follow the same principles.
+PQC signatures may be generated in either deterministic or hedged modes. The terms deterministic and hedged used in this document are in accordance with ML-DSA {{FIPS204}} and SLH-DSA {{FIPS205}}, which define the ML-DSA and SLH-DSA algorithms, respectively. Future PQC signature algorithms may adopt different nomenclature, but will be expected to follow the same principles.
 
 In the deterministic mode, the signature is derived entirely from the message and the signer’s private key, without introducing fresh randomness at signing time. While this eliminates reliance on an external random number generator, it increases susceptibility to side-channel attacks, particularly fault injection attacks. 
 
 The hedged mode provides some resistance against this risk by including precomputed randomness in the signer's private key and incorporating fresh randomness generated at signing time.
 This foils some side channel attack approaches, while adding no additional strength against others.
-If protection against side-channel attacks is required, an ML-DSA implementation that implements side-channel resistance should be used.
+If protection against side-channel attacks is required, ML-DSA implementations that implement side-channel resistance should be used.
 
 In the context of signature-based authentication in IKEv2, the data used for generating a digital signature is unique for each session, as it includes session-specific information such as nonces. PQC signature algorithms can leverage the hedged variant within IKEv2 to enhance security against side-channel attacks. The choice between deterministic and hedged signing modes does not impact interoperability because the verification process remains the same for both variants.
 
@@ -168,7 +168,7 @@ In traditional IKEv2 deployments, peers often implicitly know the signature algo
 
 # Specifying ML-DSA within IKEv2 {#ml-dsa}
 
-ML-DSA {{FIPS204}} is a digital signature algorithm based on the hardness lattice problems over module lattices (i.e., the Module Learning with Errors problem ((commonly referred to as MLWE)). The design of the algorithm is based on the "Fiat-Shamir with Aborts" {{Lyu09}} framework introduced by Lyubashevsky that leverages rejection sampling to render lattice- based Fiat-Shamir (FS) schemes compact and secure. ML-DSA uses a uniform distribution over small integers for computing coefficients in error vectors, which simplifies implementation compared to schemes requiring discrete Gaussian sampling.
+ML-DSA {{FIPS204}} is a digital signature algorithm based on the hardness lattice problems over module lattices (i.e., the Module Learning with Errors problem ((commonly referred to as MLWE)). The design of the algorithm is based on the "Fiat-Shamir with Aborts" {{Lyu09}} framework introduced by Lyubashevsky that leverages rejection sampling to render lattice-based Fiat-Shamir (FS) schemes compact and secure. ML-DSA uses a uniform distribution over small integers for computing coefficients in error vectors, which simplifies implementation compared to schemes requiring discrete Gaussian sampling.
 
 ML-DSA is instantiated with three parameter sets for the PQ Security Levels 2, 3, and 5 (see Table 2 in Section 11 of PQC for Engineers {{?RFC9958}}). Security properties of ML-DSA are discussed in Section 9 of PKIX Algorithm Identifiers for ML-DSA {{?RFC9881}}. This document specifies the use of the ML-DSA algorithm in IKEv2 at three security levels: ML-DSA-44, ML-DSA-65, and ML-DSA-87. The DER encodings of the AlgorithmIdentifier objects for ML-DSA-44, ML-DSA-65, and ML-DSA-87 are listed in {{ASN}}.
 
@@ -210,7 +210,7 @@ IKEv2 peers can use either mode of ML-DSA and SLH-DSA for authentication in IKEv
 The three security levels of ML-DSA are identified via AlgorithmIdentifier ASN.1 objects, as specified in NIST {{CSOR}} and referenced in PKIX Algorithm Identifiers for the ML-DSA {{RFC9881}}. {{FIPS204}} defines both a pure and a pre-hash variant of ML-DSA, but PKIX Algorithm Identifiers for the ML-DSA {{RFC9881}} specifies only the pure variant. 
 
 The different parameter sets of SLH-DSA are identified via AlgorithmIdentifier ASN.1 objects, as specified in NIST {{CSOR}} and referenced in PKIX Algorithm
-Identifiers for the SLH-DSA {{RFC9909}}. {{FIPS205}} defines two signature modes: pure mode and pre-hash mode. PKIX Algorithm Identifiers for the SLH-DSA {{RFC9909}} specifies the use of both Pure SLH-DSA and HashSLH-DSA in Public Key Infrastructure X.509 (PKIX) certificates and Certificate Revocation Lists (CRLs).
+Identifiers for the SLH-DSA {{RFC9909}}. {{FIPS205}} defines both a pure and a pre-hash mode of SLH-DSA, but this document specifies the use of only Pure SLH-DSA, consistent with {{sig}}.
 
 # IANA Considerations
 
@@ -231,7 +231,7 @@ SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that e
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, Eric Vyncke, John Mattsson, Tero Kivinen and Daniel Van Geest for the discussion and comments.
+Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, Eric Vyncke, John Mattsson, Russ Housley, Tero Kivinen and Daniel Van Geest for the discussion and comments.
 
 <!-- Start of Appendices -->
 
