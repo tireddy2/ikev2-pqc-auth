@@ -104,13 +104,13 @@ and Edwards-curve Digital Signature Algorithm (EdDSA) {{RFC8420}}.
 
 The existence of a Cryptographically Relevant Quantum Computer (CRQC) would render traditional asymmetric algorithms obsolete and insecure. This is because the assumptions about the intractability of the mathematical problems these algorithms rely on, which offer confident levels of security today, no longer apply in the existence of a CRQC. Consequently, there is a requirement to update protocols and infrastructure to use post-quantum algorithms. Post-quantum algorithms are asymmetric algorithms designed to be secure against CRQCs as well as classical computers. The traditional cryptographic primitives that need to be replaced by post-quantum cryptographic (PQC) algorithms are discussed in PQC for Engineers {{?RFC9958}}.
 
-This document defines a general approach to incorporating PQC digital signature algorithms into IKEv2 while maintaining interoperability and backward compatibility, as it does not change the IKEv2 protocol but adds negotiable PQC signature algorithms. Additionally, it outlines how Module-Lattice-Based Digital Signatures (ML-DSA) {{FIPS204}} and Stateless Hash-Based Digital Signatures (SLH-DSA) {{FIPS205}} can be employed as authentication methods within IKEv2, as they have been standardized the US National Institute of Standards and Technology (NIST) PQC project. 
+This document defines a general approach to incorporating PQC digital signature algorithms into IKEv2 while maintaining interoperability and backward compatibility, as it does not change the IKEv2 protocol but adds negotiable PQC signature algorithms. Additionally, it outlines how Module-Lattice-Based Digital Signatures (ML-DSA) {{FIPS204}} and Stateless Hash-Based Digital Signatures (SLH-DSA) {{FIPS205}} can be employed as authentication methods within IKEv2, as they have been standardized by the US National Institute of Standards and Technology (NIST) PQC project. 
 
 # Conventions and Definitions
 
 {::boilerplate bcp14-tagged}
 
-This document uses terms defined in Terminology for Post-Quantum Traditional Hybrid Schemes {{?RFC9794}}. For the purposes of this document, it is helpful to be able to divide cryptographic algorithms into two classes:
+For the purposes of this document, it is helpful to be able to divide cryptographic algorithms into two classes:
 
 "Asymmetric Traditional Cryptographic Algorithm": An asymmetric cryptographic algorithm based on integer factorisation, finite field discrete logarithms, elliptic curve discrete logarithms, or related mathematical problems. 
 
@@ -121,7 +121,7 @@ IKEv2 authentication commonly relies on digital signatures to verify the identit
 
 ## Specifying PQC Signature Algorithms
 - IKEv2 can use arbitrary signature algorithms as described in Signature Authentication in IKEv2 {{!RFC7427}}, where the "Digital Signature" authentication method supersedes previously defined signature authentication methods. Any PQC digital signature algorithm can be incorporated using the "Digital Signature" authentication method, as defined in {{RFC7427}}.
-- DER encoded AlgorithmIdentifier ASN.1 objects will be used to uniquely identify PQC signature algorithm scheme and the parameter set associated with it. The AlgorithmIdentifier ASN.1 object is placed in the Authentication Data field of the Authentication payload (see Figure 2 of {{RFC7427}} for details).
+- Distinguished Encoding Rules (DER) encoded AlgorithmIdentifier ASN.1 objects will be used to uniquely identify the PQC signature algorithm scheme and the parameter set associated with it. The AlgorithmIdentifier ASN.1 object is placed in the Authentication Data field of the Authentication payload (see Figure 2 of {{RFC7427}} for details).
 
 ## Signature Generation and Verification {#sig}
 
@@ -146,7 +146,7 @@ of pure mode for signature-based authentication in IKEv2, where the message is s
 
 As specified in Signature Authentication in IKEv2 {{RFC7427}}, both the initiator and responder MUST send the SIGNATURE_HASH_ALGORITHMS notify payload in the IKE_SA_INIT exchange to indicate the set of hash algorithms they support for signature generation and verification. The SIGNATURE_HASH_ALGORITHMS notify payload contains a list of 2-octet hash algorithm identifiers, defined in the IANA "IKEv2 Hash Algorithms" registry {{IANA-IKEv2-Hash}}.
 
-For PQC signature algorithms that inherently operate directly on the raw message without hashing, such as ML-DSA and SLH-DSA, only the 'Identity' hash function is applicable. The 'Identity' hash function (value 5) is defined in Section 2 of using EdDSA in IKEv2 {{RFC8420}} and indicates that the input message is used as-is, without any hash function applied. Therefore, implementations supporting such PQC signature algorithms MUST include the 'Identity' hash (5) in the SIGNATURE_HASH_ALGORITHMS notify. Furthermore, PQC signature algorithms requiring the 'Identity' hash MUST NOT be used with a peer that has not indicated support for the Identity hash in its notify payload.
+For PQC signature algorithms that inherently operate directly on the raw message without hashing, such as ML-DSA and SLH-DSA, only the 'Identity' hash function is applicable. The 'Identity' hash function (value 5) is defined in Section 2 of "Using the Edwards-Curve Digital Signature Algorithm (EdDSA) in the Internet Key Exchange Protocol Version 2 (IKEv2)" {{RFC8420}} and indicates that the input message is used as-is, without any hash function applied. Therefore, implementations supporting such PQC signature algorithms MUST include the 'Identity' hash (5) in the SIGNATURE_HASH_ALGORITHMS notification. Furthermore, PQC signature algorithms requiring the 'Identity' hash MUST NOT be used with a peer that has not indicated support for the Identity hash in its notify payload.
 
 When generating a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signer as the message to be signed (with empty context string, if applicable). The resulting signature is placed into the Signature Value field of the Authentication Payload.
 
@@ -162,13 +162,14 @@ The following mechanisms can be used by peers to signal the types of digital sig
 
 - Certificate Request Payload: One method to ascertain that the key pair type the initiator wants the responder to use is through a Certificate Request payload (defined in Section 3.7 of IKEv2 {{!RFC7296}}) sent by the initiator. For example, the initiator can specify that it trusts certificates issued by a certificate authority (CA) that signs with a particular PQC signature algorithm. This implies that the initiator can process signatures generated using that algorithm, thereby allowing the responder to authenticate itself using a key pair associated with the specified PQC signature scheme.
 
-- Authentication Method Announcement: Using Announcing Supported Authentication Method in IKEv2 {{RFC9593}}, which enables peers to declare their supported authentication methods. This improves interoperability when IKEv2 peers are configured with multiple credential types of different type to authenticate each other. The responder includes a SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT response message, listing the  signature scheme(s) it supports under the Digital Signature authentication method. The initiator includes the SUPPORTED_AUTH_METHODS notification in either the IKE_AUTH request message or in the IKE_INTERMEDIATE request. This notification lists the digital signature scheme(s) supported by the initiator, ordered by preference.
 
-In traditional IKEv2 deployments, peers often implicitly know the signature algorithms in use based on pre-configured certificates, trusted CAs, and IKEv2 policies. However, cryptographic agility, the ability to negotiate and use different cryptographic algorithms is gaining increased attention for ensuring long-term security and interoperability. This requirement becomes even more relevant with the introduction of PQC algorithms, where multiple signature algorithms with varying security levels and performance characteristics may need to be supported over time.
+- Authentication Method Announcement: Using "Announcing Supported Authentication Methods in the Internet Key Exchange Protocol Version 2 (IKEv2)" {{RFC9593}}, which enables peers to declare their supported authentication methods. This improves interoperability when IKEv2 peers are configured with multiple credential types to authenticate each other. The responder includes a SUPPORTED_AUTH_METHODS notification in the IKE_SA_INIT response message, listing the  signature scheme(s) it supports under the Digital Signature authentication method. The initiator includes the SUPPORTED_AUTH_METHODS notification in either the IKE_AUTH request message or in the IKE_INTERMEDIATE request. This notification lists the digital signature scheme(s) supported by the initiator, ordered by preference.
+
+In traditional IKEv2 deployments, peers often implicitly know the signature algorithms in use based on pre-configured certificates, trusted CAs, and IKEv2 policies. However, cryptographic agility, the ability to negotiate and use different cryptographic algorithms, is gaining increased attention for ensuring long-term security and interoperability. This requirement becomes even more relevant with the introduction of PQC algorithms, where multiple signature algorithms with varying security levels and performance characteristics may need to be supported over time.
 
 # Specifying ML-DSA within IKEv2 {#ml-dsa}
 
-ML-DSA {{FIPS204}} is a digital signature algorithm based on the hardness lattice problems over module lattices (i.e., the Module Learning with Errors problem ((commonly referred to as MLWE)). The design of the algorithm is based on the "Fiat-Shamir with Aborts" {{Lyu09}} framework introduced by Lyubashevsky that leverages rejection sampling to render lattice-based Fiat-Shamir (FS) schemes compact and secure. ML-DSA uses a uniform distribution over small integers for computing coefficients in error vectors, which simplifies implementation compared to schemes requiring discrete Gaussian sampling.
+ML-DSA {{FIPS204}} is a digital signature algorithm based on the hardness lattice problems over module lattices (i.e., the Module Learning with Errors problem (commonly referred to as MLWE)). The design of the algorithm is based on the "Fiat-Shamir with Aborts" {{Lyu09}} framework introduced by Lyubashevsky that leverages rejection sampling to render lattice-based Fiat-Shamir (FS) schemes compact and secure. ML-DSA uses a uniform distribution over small integers for computing coefficients in error vectors, which simplifies implementation compared to schemes requiring discrete Gaussian sampling.
 
 ML-DSA is instantiated with three parameter sets for the PQ Security Levels 2, 3, and 5 (see Table 2 in Section 11 of PQC for Engineers {{?RFC9958}}). Security properties of ML-DSA are discussed in Section 9 of PKIX Algorithm Identifiers for ML-DSA {{?RFC9881}}. This document specifies the use of the ML-DSA algorithm in IKEv2 at three security levels: ML-DSA-44, ML-DSA-65, and ML-DSA-87. The DER encodings of the AlgorithmIdentifier objects for ML-DSA-44, ML-DSA-65, and ML-DSA-87 are listed in {{ASN}}.
 
@@ -204,8 +205,7 @@ The DER encodings of the AlgorithmIdentifier objects for each SLH-DSA variant ar
 
 # Use of ML-DSA and SLH-DSA
 
-Both ML-DSA and SLH-DSA offer deterministic and hedged signing modes, where the hedged signing modes includes fresh randomness in the signing procedure.
-IKEv2 peers can use either mode of ML-DSA and SLH-DSA for authentication in IKEv2, with a preference for using the hedged mode ({{sig}}).
+Both ML-DSA {{FIPS204}} and SLH-DSA {{FIPS205}} define deterministic and hedged signing modes, where the hedged mode incorporates fresh randomness into the signing procedure. IKEv2 peers can use either mode of ML-DSA and SLH-DSA for authentication in IKEv2, with a preference for the hedged mode ({{sig}}). The signing mode is a local decision made by the signer; it is not negotiated between the peers, and the verifier neither knows nor needs to know which mode was used, since verification is identical in both cases.
 
 The three security levels of ML-DSA are identified via AlgorithmIdentifier ASN.1 objects, as specified in NIST {{CSOR}} and referenced in PKIX Algorithm Identifiers for the ML-DSA {{RFC9881}}. {{FIPS204}} defines both a pure and a pre-hash variant of ML-DSA, but PKIX Algorithm Identifiers for the ML-DSA {{RFC9881}} specifies only the pure variant. 
 
@@ -231,7 +231,7 @@ SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that e
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, Eric Vyncke, John Mattsson, Russ Housley, Tero Kivinen and Daniel Van Geest for the discussion and comments.
+Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, Eric Vyncke, John Mattsson, Russ Housley, Tony Li, Tero Kivinen and Daniel Van Geest for the discussion and comments.
 
 <!-- Start of Appendices -->
 
