@@ -226,7 +226,7 @@ Whether authentication using a PQC signature algorithm is mandatory or optional 
 
 # Security Considerations
 
-The SIGNATURE_HASH_ALGORITHMS notification is carried in IKE_SA_INIT, and its contents are integrity protected by the AUTH payload in IKE_AUTH (Section 2.15 of {{RFC7296}}). Therefore, an on-path attacker cannot modify the advertised hash algorithms to cause a downgrade from PQC to traditional authentication without causing authentication to fail. 
+The SIGNATURE_HASH_ALGORITHMS notification is carried in IKE_SA_INIT, and its contents are integrity protected by the AUTH payload in IKE_AUTH (Section 2.15 of {{RFC7296}}). An on-path attacker that cannot forge the AUTH payload cannot modify the advertised hash algorithms without causing authentication to fail. However, if a CRQC-capable attacker can forge a traditional signature, and authentication using a PQC signature algorithm is optional, the attacker may be able to authenticate using a traditional signature algorithm. Deployments requiring protection against such an attack MUST require authentication using a PQC signature algorithm and MUST NOT allow fallback to traditional signature algorithm authentication.
 
 PQC signature algorithms are generally modeled to achieve strong unforgeability under adaptive chosen-message attacks (SUF-CMA). Both ML-DSA and SLH-DSA achieve SUF-CMA security, as noted in Section 10.1.1 of PQC for Engineers {{?RFC9958}}. Even for a future PQC signature scheme that provides only existential unforgeability under chosen-message attacks (EUF-CMA), this distinction would not impact IKEv2, as the signed data in each session is unique due to the inclusion of nonces. Consequently, the oracle-based forgery attack scenarios in the EUF-CMA model do not arise in IKEv2.
 
