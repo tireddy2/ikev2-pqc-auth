@@ -76,7 +76,9 @@ normative:
 
 informative:
   Lyu09:
-      title: "V. Lyubashevsky, “Fiat-Shamir With Aborts: Applications to Lattice and Factoring-Based Signatures“, ASIACRYPT 2009"
+      title: "Fiat-Shamir With Aborts: Applications to Lattice and Factoring-Based Signatures"
+      author:
+        name: Vadim Lyubashevsky
       target: https://www.iacr.org/archive/asiacrypt2009/59120596/59120596.pdf
       date: false
   RFC5280:
@@ -127,7 +129,7 @@ IKEv2 authentication commonly relies on digital signatures to verify the identit
 
 PQC signatures may be generated in either deterministic or hedged modes. The terms deterministic and hedged used in this document are in accordance with ML-DSA {{FIPS204}} and SLH-DSA {{FIPS205}}, which define the ML-DSA and SLH-DSA algorithms, respectively. Future PQC signature algorithms may adopt different nomenclature, but will be expected to follow the same principles.
 
-In the deterministic mode, the signature is derived entirely from the message and the signer’s private key, without introducing fresh randomness at signing time. While this eliminates reliance on an external random number generator, it increases susceptibility to side-channel attacks, particularly fault injection attacks. 
+In the deterministic mode, the signature is derived entirely from the message and the signer's private key, without introducing fresh randomness at signing time. While this eliminates reliance on an external random number generator, it increases susceptibility to side-channel attacks, particularly fault injection attacks {{?RFC9881}}.
 
 The hedged mode provides some resistance against this risk by including precomputed randomness in the signer's private key and incorporating fresh randomness generated at signing time.
 This foils some side channel attack approaches, while adding no additional strength against others.
@@ -216,9 +218,17 @@ Identifiers for the SLH-DSA {{RFC9909}}. {{FIPS205}} defines both a pure and a p
 
 This document makes no requests to IANA.
 
+# Operational Considerations
+
+Deployments should configure the PQC algorithms and security levels appropriate for their security requirements.
+
+Whether authentication using a PQC signature algorithm is mandatory or optional is a matter of local policy. When such authentication is mandatory, an implementation MUST NOT fall back to authentication using a traditional algorithm if a suitable PQC signature algorithm cannot be negotiated. When such authentication is optional, an implementation may use a traditional signature algorithm when a suitable PQC signature algorithm cannot be negotiated.
+
 # Security Considerations
 
-PQC signature algorithms are generally modeled to achieve strong unforgeability under adaptive chosen-message attacks (SUF-CMA; see Section 10.1.1 of PQC for Engineers {{?RFC9958}}). For example, ML-DSA provides SUF-CMA security. However, some algorithms, such as SLH-DSA, achieve existential unforgeability under chosen-message attacks (EUF-CMA; see Section 10.1.1 of PQC for Engineers {{?RFC9958}}). This distinction does not impact IKEv2, as the signed data in each session is unique due to the inclusion of nonces. Consequently, the oracle-based forgery attack scenarios in the EUF-CMA model do not arise in IKEv2.
+The SIGNATURE_HASH_ALGORITHMS notification is carried in IKE_SA_INIT, and its contents are integrity protected by the AUTH payload in IKE_AUTH (Section 2.15 of {{RFC7296}}). Therefore, an on-path attacker cannot modify the advertised hash algorithms to cause a downgrade from PQC to traditional authentication without causing authentication to fail. 
+
+PQC signature algorithms are generally modeled to achieve strong unforgeability under adaptive chosen-message attacks (SUF-CMA). Both ML-DSA and SLH-DSA achieve SUF-CMA security, as noted in Section 10.1.1 of PQC for Engineers {{?RFC9958}}. Even for a future PQC signature scheme that provides only existential unforgeability under chosen-message attacks (EUF-CMA), this distinction would not impact IKEv2, as the signed data in each session is unique due to the inclusion of nonces. Consequently, the oracle-based forgery attack scenarios in the EUF-CMA model do not arise in IKEv2.
 
 Different PQC signature schemes are designed to provide security levels comparable to well-established cryptographic primitives. For example, some schemes align with the US NIST post-quantum security categories (Categories 1 through 5) as discussed in ML-DSA  {{FIPS204}} and SLH-DSA {{FIPS205}}. These categories specify target security strengths that correspond approximately to exhaustive key-search resistance for AES-128, AES-192, and AES-256, and collision-search resistance for SHA-256, SHA-384, and SHA-512. The choice of a PQC signature algorithm should be guided by the desired security level and performance requirements.
 
@@ -226,12 +236,12 @@ ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable wi
 
 The Security Considerations section of PKIX Algorithm Identifiers for ML-DSA {{?RFC9881}} and PKIX Algorithm Identifiers for SLH-DSA {{?RFC9909}} apply to this specification as well.
 
-SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that even a IKEv2 server establishing IKEv2 sessions at an extremely high rate could not realistically reach it (at 10 billion signatures per second, it would still take over 58 years). The limit is therefore of theoretical interest only, but implementations may still track signature usage as a precautionary security measure. ML-DSA does not have a built-in signature limit, allowing for an arbitrary number of signatures to be made with the same key.
+SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that even an IKEv2 server establishing IKEv2 sessions at an extremely high rate could not realistically reach it (at 10 billion signatures per second, it would still take over 58 years). The limit is therefore of theoretical interest only, but implementations may still track signature usage as a precautionary security measure. ML-DSA does not have a built-in signature limit, allowing for an arbitrary number of signatures to be made with the same key.
 
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, Eric Vyncke, John Mattsson, Russ Housley, Tony Li, Tero Kivinen and Daniel Van Geest for the discussion and comments.
+Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, Eric Vyncke, John Mattsson, Russ Housley, Tony Li, Mahesh Jethanandani, Tero Kivinen and Daniel Van Geest for the discussion and comments.
 
 <!-- Start of Appendices -->
 
@@ -242,8 +252,8 @@ Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffe
 With ML-DSA, there are two different approaches to implementing the signature process.
 The first one is to provide the SignedOctets string to the cryptographic library to generate the full signature; this works for SLH-DSA as well.
 
-The second approach involves using the External&mu;-ML-DSA API allowed by {{FIPS204}}; specifically by the comment to line 6 of algorithm 7 of FIPS 204.
-In this method, the implementation calls the External &mu; pre-hashing mode with the SignedOctets string and the ML-DSA public key, which externalizes the message pre-hashing originally performed inside the signing operation (see Appendix D of {{RFC9881}} for ML-DSA pre-hashing). The resulting &mu; value is then passed to the cryptographic library to execute the External&mu;-ML-DSA.Sign API, which uses &mu; and the ML-DSA private key to produce the signature. This document specifies only the use of ML-DSA's External &mu; mode and does not use HashML-DSA. This approach avoids requiring large message inputs to be processed within potentially constrained cryptographic modules, such as Hardware Security Modules (HSMs).
+The second approach involves using the External &mu;-ML-DSA API allowed by {{FIPS204}}; specifically by the comment to line 6 of algorithm 7 of FIPS 204.
+In this method, the implementation calls the External &mu; pre-hashing mode with the SignedOctets string and the ML-DSA public key, which externalizes the message pre-hashing originally performed inside the signing operation (see Appendix D of {{RFC9881}} for ML-DSA pre-hashing). The resulting &mu; value is then passed to the cryptographic library to execute the External &mu;-ML-DSA.Sign API, which uses &mu; and the ML-DSA private key to produce the signature. This document specifies only the use of ML-DSA's External &mu; mode and does not use HashML-DSA. This approach avoids requiring large message inputs to be processed within potentially constrained cryptographic modules, such as Hardware Security Modules (HSMs).
 
 Both approaches are considered "pure" mode and produce the same ML-DSA signature and are fully interoperable. The choice between them depends on implementation preferences, such as whether the External &mu; pre-hashing step is handled internally by the cryptographic module or performed explicitly by the IKEv2 implementation. 
 
