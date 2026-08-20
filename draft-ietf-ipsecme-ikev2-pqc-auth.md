@@ -129,7 +129,7 @@ IKEv2 authentication commonly relies on digital signatures to verify the identit
 
 PQC signatures may be generated in either deterministic or hedged modes. The terms deterministic and hedged used in this document are in accordance with ML-DSA {{FIPS204}} and SLH-DSA {{FIPS205}}, which define the ML-DSA and SLH-DSA algorithms, respectively. Future PQC signature algorithms may adopt different nomenclature, but will be expected to follow the same principles.
 
-In the deterministic mode, the signature is derived entirely from the message and the signer's private key, without introducing fresh randomness at signing time. While this eliminates reliance on an external random number generator, it increases susceptibility to side-channel attacks, particularly fault injection attacks {{?RFC9881}}.
+In the deterministic mode, the signature is derived entirely from the message and the signer's private key, without introducing fresh randomness at signing time. While this eliminates reliance on an external random number generator, it increases susceptibility to side-channel attacks, particularly fault injection attacks {{!RFC9881}}. 
 
 The hedged mode provides some resistance against this risk by including precomputed randomness in the signer's private key and incorporating fresh randomness generated at signing time.
 This foils some side channel attack approaches, while adding no additional strength against others.
@@ -154,7 +154,7 @@ When generating a signature with a PQC signature algorithm, the IKEv2 implementa
 
 When verifying a signature with a PQC signature algorithm, the IKEv2 implementation takes the InitiatorSignedOctets string or the ResponderSignedOctets string (as appropriate), logically sends it to the identity hash (which leaves it unchanged), and then passes it into the PQC signature verifier as the message to be verified (with empty context string, if applicable).
 
-IKEv2 peers supporting the PQC authentication mechanism defined in this specification MUST implement IKEv2 message fragmentation {{!RFC7383}}, unless IKEv2 runs over a reliable transport (e.g., {{?RFC9329}}) or the underlying network is known to support sufficiently large MTUs without fragmentation issues, since PQC public keys and signatures can be significantly larger than those used in traditional algorithms. 
+IKEv2 peers supporting the PQC authentication mechanism defined in this specification MUST implement IKEv2 message fragmentation {{!RFC7383}}, since PQC public keys and signatures can be significantly larger than those used in traditional algorithms. Fragmentation is not required if IKEv2 runs over a reliable transport, or if the path MTU (PMTU) is known to the IKEv2 implementation, either through configuration or through PMTU discovery (see Section 2.5.2 of {{!RFC7383}}), and is large enough to carry these messages. TCP encapsulation of IKE and IPsec packets {{?RFC9329}} is one example of such a reliable transport. 
 For example, ML-DSA-44 requires a public key of 1,312 bytes and a signature of 2,420 bytes, while even the smallest SLH-DSA signature is around 7,856 bytes. As guidance, IKEv2 peers should assume a minimum PMTU of 1280 bytes for IPv6 (per {{?RFC8200}}) and, where legacy IPv4 networks are a consideration, an effective MTU of 576 bytes for IPv4 (per {{?RFC1122}}).
 
 
@@ -173,9 +173,7 @@ In traditional IKEv2 deployments, peers often implicitly know the signature algo
 
 ML-DSA {{FIPS204}} is a digital signature algorithm based on the hardness lattice problems over module lattices (i.e., the Module Learning with Errors problem (commonly referred to as MLWE)). The design of the algorithm is based on the "Fiat-Shamir with Aborts" {{Lyu09}} framework introduced by Lyubashevsky that leverages rejection sampling to render lattice-based Fiat-Shamir (FS) schemes compact and secure. ML-DSA uses a uniform distribution over small integers for computing coefficients in error vectors, which simplifies implementation compared to schemes requiring discrete Gaussian sampling.
 
-ML-DSA is instantiated with three parameter sets for the PQ Security Levels 2, 3, and 5 (see Table 2 in Section 11 of PQC for Engineers {{?RFC9958}}). Security properties of ML-DSA are discussed in Section 9 of PKIX Algorithm Identifiers for ML-DSA {{?RFC9881}}. This document specifies the use of the ML-DSA algorithm in IKEv2 at three security levels: ML-DSA-44, ML-DSA-65, and ML-DSA-87. The DER encodings of the AlgorithmIdentifier objects for ML-DSA-44, ML-DSA-65, and ML-DSA-87 are listed in {{ASN}}.
-
-
+ML-DSA is instantiated with three parameter sets for the PQ Security Levels 2, 3, and 5 (see Table 2 in Section 11 of PQC for Engineers {{?RFC9958}}). Security properties of ML-DSA are discussed in Section 9 of PKIX Algorithm Identifiers for ML-DSA {{!RFC9881}}. This document specifies the use of the ML-DSA algorithm in IKEv2 at three security levels: ML-DSA-44, ML-DSA-65, and ML-DSA-87. The DER encodings of the AlgorithmIdentifier objects for ML-DSA-44, ML-DSA-65, and ML-DSA-87 are listed in {{ASN}}. {{impl-alt}} describes two interoperable approaches for implementing ML-DSA signing. 
 
 # Specifying SLH-DSA within IKEv2 {#slh-dsa}
 
@@ -200,7 +198,7 @@ The following combinations are defined in SLH-DSA {{FIPS205}}:
 * SLH-DSA-256S-SHAKE
 * SLH-DSA-256F-SHAKE
 
-SLH-DSA does not introduce a new hardness assumption beyond those inherent to the underlying hash functions. It builds upon established foundations in cryptography, making it a reliable and robust digital signature scheme in the face of a CRQC. While attacks on lattice-based schemes like ML-DSA are hypothetical as of 2026, such attacks, if realized, could compromise their security. SLH-DSA would remain unaffected by these attacks due to its distinct mathematical foundations. This ensures the continued security of systems and protocols that utilize SLH-DSA for digital signatures.
+SLH-DSA does not introduce a new hardness assumption beyond those inherent to the underlying hash functions. It builds upon established foundations in cryptography, making it a reliable and robust digital signature scheme in the face of a CRQC. While attacks on lattice-based schemes like ML-DSA are hypothetical as of 2026, such attacks, if realized, could compromise their security. SLH-DSA would remain unaffected by these attacks due to its distinct mathematical foundations. This provides an alternative security foundation for systems and protocols that utilize SLH-DSA, reducing their dependence on lattice-based cryptographic assumptions. 
 
 The DER encodings of the AlgorithmIdentifier objects for each SLH-DSA variant are listed in {{ASN}}.
 
@@ -226,7 +224,7 @@ Whether authentication using a PQC signature algorithm is mandatory or optional 
 
 # Security Considerations
 
-The SIGNATURE_HASH_ALGORITHMS notification is carried in IKE_SA_INIT, and its contents are integrity protected by the AUTH payload in IKE_AUTH (Section 2.15 of {{RFC7296}}). An on-path attacker that cannot forge the AUTH payload cannot modify the advertised hash algorithms without causing authentication to fail. However, if a CRQC-capable attacker can forge a traditional signature, and authentication using a PQC signature algorithm is optional, the attacker may be able to authenticate using a traditional signature algorithm. Deployments requiring protection against such an attack MUST require authentication using a PQC signature algorithm and MUST NOT allow fallback to traditional signature algorithm authentication.
+The SIGNATURE_HASH_ALGORITHMS notification and the SUPPORTED_AUTH_METHODS notification advertise the hash algorithms and the PQC signature algorithms that a peer supports. Their contents are protected by the AUTH payload (Section 2.15 of {{RFC7296}}), so an on-path attacker that cannot forge the AUTH payload cannot modify them without causing authentication to fail. However, if a CRQC-capable attacker can forge a traditional signature, and PQC signature algorithm authentication is optional, the attacker can impersonate an IKEv2 initiator or responder that supports traditional signature algorithm authentication and act as a person-in-the-middle; it may also modify these notifications, for example by removing the PQC signature algorithm announcements (Section 6 of {{RFC9593}}), to cause a downgrade to traditional signature algorithm authentication. Deployments requiring protection against such an attack MUST require authentication using a PQC signature algorithm and MUST NOT allow fallback to traditional signature algorithm authentication.
 
 PQC signature algorithms are generally modeled to achieve strong unforgeability under adaptive chosen-message attacks (SUF-CMA). Both ML-DSA and SLH-DSA achieve SUF-CMA security, as noted in Section 10.1.1 of PQC for Engineers {{?RFC9958}}. Even for a future PQC signature scheme that provides only existential unforgeability under chosen-message attacks (EUF-CMA), this distinction would not impact IKEv2, as the signed data in each session is unique due to the inclusion of nonces. Consequently, the oracle-based forgery attack scenarios in the EUF-CMA model do not arise in IKEv2.
 
@@ -234,20 +232,20 @@ Different PQC signature schemes are designed to provide security levels comparab
 
 ML-DSA-44, ML-DSA-65, and ML-DSA-87 are designed to offer security comparable with the SHA-256/SHA3-256 collision resistance (which is a harder problem than AES-128 key search), AES-192 key search, and AES-256 key search, respectively. Similarly, SLH-DSA-128{S,F}-{SHA2,SHAKE}, SLH-DSA-192{S,F}-{SHA2,SHAKE}, and SLH-DSA-256{S,F}-{SHA2,SHAKE} are designed to offer security comparable with the AES-128, AES-192, and AES-256 respectively.
 
-The Security Considerations section of PKIX Algorithm Identifiers for ML-DSA {{?RFC9881}} and PKIX Algorithm Identifiers for SLH-DSA {{?RFC9909}} apply to this specification as well.
+The Security Considerations section of PKIX Algorithm Identifiers for ML-DSA {{!RFC9881}} and PKIX Algorithm Identifiers for SLH-DSA {{!RFC9909}} apply to this specification as well. 
 
 SLH-DSA keys are limited to 2^64 signatures. This upper bound is so large that even an IKEv2 server establishing IKEv2 sessions at an extremely high rate could not realistically reach it (at 10 billion signatures per second, it would still take over 58 years). The limit is therefore of theoretical interest only, but implementations may still track signature usage as a precautionary security measure. ML-DSA does not have a built-in signature limit, allowing for an arbitrary number of signatures to be made with the same key.
 
 # Acknowledgements
 {:numbered="false"}
 
-Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, Eric Vyncke, John Mattsson, Russ Housley, Tony Li, Mahesh Jethanandani, Tero Kivinen and Daniel Van Geest for the discussion and comments.
+Thanks to Stefaan De Cnodder, Loganaden Velvindron, Paul Wouters, Andreas Steffen, Dan Wing, Wang Guilin, Rebecca Guthrie, Jonathan Hammell, Eric Vyncke, John Mattsson, Russ Housley, Tony Li, Mahesh Jethanandani, Tero Kivinen, Daniel Van Geest, Mike Bishop and Ketan Talaulikar for the discussion and comments. 
 
 <!-- Start of Appendices -->
 
 --- back
 
-# Implementation Alternatives for ML-DSA
+# Implementation Alternatives for ML-DSA {#impl-alt}
 
 With ML-DSA, there are two different approaches to implementing the signature process.
 The first one is to provide the SignedOctets string to the cryptographic library to generate the full signature; this works for SLH-DSA as well.
